@@ -1,0 +1,28 @@
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+
+SELECT DISTINCT ?mededeling ?titel ?agenda ?meeting ?verslag ?behandelingVanAgendapunt ?beslissing ?dossier ?dossierTitle WHERE {
+  {
+    SELECT DISTINCT ?mededeling ?titel ?procedurestap WHERE {
+      ?mededeling a besluit:Agendapunt .
+      ?mededeling ext:wordtGetoondAlsMededeling "true"^^tl:boolean .
+      OPTIONAL { ?mededeling dct:title ?titel } .
+      ?agendering besluitvorming:genereertAgendapunt ?mededeling .
+      ?agendering besluitvorming:vindtPlaatsTijdens ?procedurestap .
+    }
+  }
+  ?behandelingVanAgendapunt besluitvorming:heeftOnderwerp ?mededeling .
+  ?behandelingVanAgendapunt besluitvorming:genereertVerslag ?verslag .
+  ?behandelingVanAgendapunt besluitvorming:resultaat ?beslissingsResultaatCode .
+  ?beslissingsResultaatCode skos:prefLabel ?beslissing .
+  ?dossier dossier:doorloopt ?procedurestap .
+  OPTIONAL { ?dossier dct:title ?dossierTitle } .
+  ?agenda dct:hasPart ?mededeling .
+  ?agenda besluitvorming:isAgendaVoor ?meeting .
+}

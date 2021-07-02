@@ -1,0 +1,12 @@
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT DISTINCT ?dossier ?dossierTitle ?procedurestapTitle ?procedurestapAltTitle ?procedurestap WHERE {
+  ?dossier a dossier:Dossier .
+  ?dossier dct:title ?dossierTitle .
+  ?dossier dossier:doorloopt ?procedurestap .
+  ?procedurestap dct:title ?procedurestapTitle .
+  ?procedurestap dct:alternative ?procedurestapAltTitle .
+  FILTER ( ?dossierTitle = ?procedurestapTitle )
+}
