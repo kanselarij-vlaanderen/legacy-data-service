@@ -277,13 +277,32 @@ app.get('/agendapunten-zonder-documenten-zonder-beslissing', async function(req,
   }
 });
 
-//TODO
-
-/* Oplijsten van agenda's waar er geen doorlopende nummering is van agendapunten */
-
-/* Oplijsten van agenda's waar er geen Word agenda is */
+/* Oplijsten van meetings waar er geen document ‘VR AGENDA …’ aan verbonden is */
+app.get('/meetings-zonder-agenda-document', async function(req, res) {
+  const query = await getQueryFromFile('/app/queries/meetings_zonder_agenda_document.sparql');
+  try {
+    let results = await kaleidosData.executeQuery(query, req.query.limit);
+    // generate urls
+    for (const result of results) {
+      const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
+      const agendaId = result.agenda.substring(result.agenda.lastIndexOf('/') + 1);
+      result.url = `${BASE_URL}/vergadering/${meetingId}/agenda/${agendaId}/documenten`;
+    }
+    console.log(`GET /meetings-zonder-agenda-document: ${results.length} results`);
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res);
+    } else {
+      res.send(results);
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
 
 /* Oplijsten van agenda's met punten zonder titel */
+
+/* Oplijsten van agenda's waar er geen doorlopende nummering is van agendapunten */
 
 /* Oplijsten dubbele agendapunten (nummers of titel) */
 
