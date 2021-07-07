@@ -301,9 +301,111 @@ app.get('/meetings-zonder-agenda-document', async function(req, res) {
 });
 
 /* Oplijsten van agenda's met punten zonder titel */
+app.get('/agendapunten-zonder-titel', async function(req, res) {
+  const query = await getQueryFromFile('/app/queries/agendapunten_zonder_titel.sparql');
+  try {
+    let results = await kaleidosData.executeQuery(query, req.query.limit);
+    // generate urls
+    for (const result of results) {
+      const agendapuntId = result.agendapunt.substring(result.agendapunt.lastIndexOf('/') + 1);
+      const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
+      const agendaId = result.agenda.substring(result.agenda.lastIndexOf('/') + 1);
+      result.url = `${BASE_URL}/vergadering/${meetingId}/agenda/${agendaId}/agendapunten/${agendapuntId}`;
+    }
+    console.log(`GET /agendapunten-zonder-titel: ${results.length} results`);
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res);
+    } else {
+      res.send(results);
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
 
 /* Oplijsten van agenda's waar er geen doorlopende nummering is van agendapunten */
+app.get('/agendas-nummering', async function(req, res) {
+  // this query was optimized by removing all optionals, such as dct:title , since they significantly slowed down the query execution
+  const query = await getQueryFromFile('/app/queries/agendas_nummering.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
+  try {
+    let results = await kaleidosData.executeQuery(query, req.query.limit);
+    console.log(`GET /agendas-nummering: ${results.length} results before filtering`);
+    // first group the results per agenda
+    let agendas = {};
+    for (const result of results) {
+      if (result.agenda) {
+        if (!agendas[result.agenda]) {
+          agendas[result.agenda] = {
+            agenda: result.agenda,
+            titel: result.agendaTitel,
+            geplandeStart: result.geplandeStart,
+            meeting: result.meeting,
+            agendapunten: []
+          }
+        }
+        let agendapunt = {
+          agendapunt: result.agendapunt,
+          prioriteit: result.agendapuntPrioriteit
+        };
+        agendas[result.agenda].agendapunten.push(agendapunt);
+      }
+    }
+    // now filter out the agenda's with uninterrupted numbers
+    let filteredResults = [];
+    for (const agendaUrl in agendas) {
+      if (agendas.hasOwnProperty(agendaUrl)) {
+        let missingNumbers = [];
+        let previousNumber = null;
+        if (agendas[agendaUrl].agendapunten) {
+          // first sort the agenda items by priority number
+          agendas[agendaUrl].agendapunten = agendas[agendaUrl].agendapunten.sort((a, b) => {
+            if (+a.prioriteit > +b.prioriteit) {
+              return 1;
+            } else if (+a.prioriteit < +b.prioriteit) {
+              return -1;
+            }
+            return 0;
+          });
+          // now check if the numbers are uninterrupted
+          for (const agendapunt of agendas[agendaUrl].agendapunten) {
+            if (agendapunt.prioriteit === undefined) {
+              missingNumbers.push('missing a priority number for: ' + agendapunt.agendapunt);
+            } else if (previousNumber !== null && +agendapunt.prioriteit !== previousNumber + 1) {
+              missingNumbers.push(agendapunt.prioriteit + ' should be ' + (previousNumber + 1) + ' for: ' + agendapunt.agendapunt);
+            }
+            if (agendapunt.prioriteit !== undefined) {
+              previousNumber = +agendapunt.prioriteit;
+            }
+          }
+        }
+        if (missingNumbers.length > 0) {
+          agendas[agendaUrl].missingNumbers = missingNumbers;
+          filteredResults.push(agendas[agendaUrl]);
+        }
+      }
+    }
+    // generate urls
+    for (const result of filteredResults) {
+      if (result.meeting && result.agenda) {
+        const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
+        const agendaId = result.agenda.substring(result.agenda.lastIndexOf('/') + 1);
+        result.url = `${BASE_URL}/vergadering/${meetingId}/agenda/${agendaId}/agendapunten`;
+      }
+    }
+    console.log(`GET /agendas-nummering: ${filteredResults.length} filtered results`);
+    if (req.query && req.query.csv) {
+      sendCSV(filteredResults, req, res);
+    } else {
+      res.send(filteredResults);
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
 
 /* Oplijsten dubbele agendapunten (nummers of titel) */
+// zitten normaal gezien in vorige lijst
 
 app.use(errorHandler);
