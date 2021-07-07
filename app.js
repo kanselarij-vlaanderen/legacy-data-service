@@ -359,7 +359,7 @@ app.get('/agendas-nummering', async function(req, res) {
         let previousNumber = null;
         if (agendas[agendaUrl].agendapunten) {
           // first sort the agenda items by priority number
-          agendas[agendaUrl].agendapunten = agendas[agendaUrl].agendapunten.sort((a, b) => {
+          agendas[agendaUrl].agendapunten.sort((a, b) => {
             if (+a.prioriteit > +b.prioriteit) {
               return 1;
             } else if (+a.prioriteit < +b.prioriteit) {
