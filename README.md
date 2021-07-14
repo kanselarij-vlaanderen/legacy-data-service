@@ -36,6 +36,7 @@ Note that the `DEV_OS` variable is optional, to enable live reload on Windows.
 - Oplijsten van agendapunten met een gelinkte mandataris en met een titel waar het woord “bekrachtiging” in staat: http://localhost:8889/agendapunt-bekrachtiging-met-mandataris
 
 - Oplijsten van alle documenten verbonden aan een agendapunt met een titel waar het woord “bekrachtiging” in staat en die in Kaleidos niet publiek staan.: http://localhost:8889/documenten-bekrachtiging-niet-publiek
+
 - Oplijsten van alle dossiernamen met "goedkeuring" in de titel en daaronder resorterende agendapunt-titels: http://localhost:8889/dossiers-goedkeuring
 
 - Oplijsten van alle dossiers waar een gestandardiseerde vorm van een procedurestapnaam in de titel staat: http://localhost:8889/dossiers-titel-procedurestap
@@ -45,3 +46,9 @@ Note that the `DEV_OS` variable is optional, to enable live reload on Windows.
 - Oplijsten van alle agendapunten zonder documenten en met een beslissing: http://localhost:8889/agendapunten-zonder-documenten-met-beslissing
 
 - Oplijsten van alle agendapunten zonder documenten en zonder beslissing: http://localhost:8889/agendapunten-zonder-documenten-zonder-beslissing
+
+- Oplijsten van meetings waar er geen document ‘VR AGENDA …’ aan verbonden is: http://localhost:8889/meetings-zonder-agenda-document
+
+- Oplijsten van agenda's met punten zonder titel: http://localhost:8889/agendapunten-zonder-titel
+
+- Oplijsten van agenda's waar er geen doorlopende nummering is van agendapunten: http://localhost:8889/agendas-nummering

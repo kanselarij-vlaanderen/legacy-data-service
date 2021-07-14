@@ -5,7 +5,8 @@ import { promises as fsp } from 'fs';
 import * as path from 'path';
 
 // const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
-const BASE_URL = 'http://localhost';
+const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
+const CSV_EXPORT_FOLDER = '/app/data/'
 
 const getQueryFromFile = async function (queryPath) {
   let filePath = path.resolve(queryPath);
@@ -21,34 +22,61 @@ const getQueryFromFile = async function (queryPath) {
 
 const generateCSV = function (headers, data) {
   let csvString = ``;
+  // add the headers
   for (const header of headers) {
     csvString += `${header};`;
   }
+  // remove the last semicolon
+  csvString = csvString.replace(/undefined/g, '');
   csvString += `\n`;
+  // add the data
   for (const item of data) {
-    for (const key in item) {
-      if (item.hasOwnProperty(key)) {
-        csvString += `${item[key]};`;
+    for (const header of headers) {
+      if (item.hasOwnProperty(header)) {
+        if (typeof item[header] === 'object') {
+          csvString += `"${JSON.stringify(item[header])}";`;
+        } else if (item[header] !== undefined && item[header].indexOf('http') === 0) {
+          csvString += `${item[header]};`;
+        } else {
+          if (item[header] !== undefined && item[header].indexOf('"') > -1) {
+            console.log('WARNING: data contains double quotes which were replaced by single quotes');
+            item[header] = item[header].replace(/"/g, '\'');
+          }
+          csvString += `"${item[header]}";`;
+        }
+      } else {
+        csvString += ';';
       }
     }
+    // remove the last semicolon
+    csvString = csvString.substring(0, csvString.length - 1);
     csvString += `\n`;
   }
   csvString = csvString.replace(/undefined/g, '');
   return csvString;
 };
 
-const sendCSV = function (results, req, res) {
+const sendCSV = async function (results, req, res, fileSuffix) {
+  if (!fileSuffix) {
+    fileSuffix = 'results.csv';
+  }
   let csvString = '';
   if (results && results.length) {
     let headers = [];
     for (const key in results[0]) {
       if (results[0].hasOwnProperty(key)) {
-        headers.push(key);
+        // make sure data urls are pushed to the last columns for clarity
+        if (results[0][key] !== undefined && results[0][key].indexOf('http') === 0 && results[0][key].indexOf(BASE_URL) === -1) {
+          headers.push(key);
+        } else {
+          headers.splice(0, 0, key);
+        }
       }
     }
     csvString = generateCSV(headers, results);
   }
-  res.send(csvString);
+  await fsp.writeFile(path.resolve(CSV_EXPORT_FOLDER + fileSuffix), csvString);
+  res.send('CSV generated at ' + path.resolve(CSV_EXPORT_FOLDER + fileSuffix));
 }
 
 /* See queries/*.sparql for the individual queries. Many of them return a large number of results, so subqueries had to be used to avoid a timeout */
@@ -69,7 +97,7 @@ app.get('/agendapunt-mededelingen-met-verslag', async function(req, res) {
     }
     console.log(`GET /agendapunt-mededelingen-met-verslag: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'agendapunt-mededelingen-met-verslag.csv');
     } else {
       res.send(results);
     }
@@ -93,7 +121,7 @@ app.get('/mededelingen-met-DOC', async function(req, res) {
     }
     console.log(`GET /mededelingen-met-DOC: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'mededelingen-met-DOC.csv');
     } else {
       res.send(results);
     }
@@ -127,7 +155,7 @@ app.get('/agendapunt-bekrachtiging-met-mandataris', async function(req, res) {
     }
     console.log(`GET /agendapunt-bekrachtiging-met-mandataris: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'agendapunt-bekrachtiging-met-mandataris.csv');
     } else {
       res.send(results);
     }
@@ -151,7 +179,7 @@ app.get('/documenten-bekrachtiging-niet-publiek', async function(req, res) {
     }
     console.log(`GET /documenten-bekrachtiging-niet-publiek: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'documenten-bekrachtiging-niet-publiek.csv');
     } else {
       res.send(results);
     }
@@ -173,7 +201,7 @@ app.get('/dossiers-goedkeuring', async function(req, res) {
     }
     console.log(`GET /dossiers-goedkeuring: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'dossiers-goedkeuring.csv');
     } else {
       res.send(results);
     }
@@ -193,9 +221,9 @@ app.get('/dossiers-titel-procedurestap', async function(req, res) {
       const dossierId = result.dossier.substring(result.dossier.lastIndexOf('/') + 1);
       result.url = `${BASE_URL}/dossiers/${dossierId}/deeldossiers`;
     }
-    console.log(`GET /dossiers-goedkeuring: ${results.length} results`);
+    console.log(`GET /dossiers-titel-procedurestap: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'dossiers-titel-procedurestap.csv');
     } else {
       res.send(results);
     }
@@ -219,7 +247,7 @@ app.get('/agendapunten-zonder-documenten', async function(req, res) {
     }
     console.log(`GET /agendapunten-zonder-documenten: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'agendapunten-zonder-documenten.csv');
     } else {
       res.send(results);
     }
@@ -243,7 +271,7 @@ app.get('/agendapunten-zonder-documenten-met-beslissing', async function(req, re
     }
     console.log(`GET /agendapunten-zonder-documenten-met-beslissing: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'agendapunten-zonder-documenten-met-beslissing.csv');
     } else {
       res.send(results);
     }
@@ -267,7 +295,7 @@ app.get('/agendapunten-zonder-documenten-zonder-beslissing', async function(req,
     }
     console.log(`GET /agendapunten-zonder-documenten-zonder-beslissing: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'agendapunten-zonder-documenten-zonder-beslissing.csv');
     } else {
       res.send(results);
     }
@@ -290,7 +318,7 @@ app.get('/meetings-zonder-agenda-document', async function(req, res) {
     }
     console.log(`GET /meetings-zonder-agenda-document: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'meetings-zonder-agenda-document.csv');
     } else {
       res.send(results);
     }
@@ -314,7 +342,7 @@ app.get('/agendapunten-zonder-titel', async function(req, res) {
     }
     console.log(`GET /agendapunten-zonder-titel: ${results.length} results`);
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res);
+      sendCSV(results, req, res, 'agendapunten-zonder-titel.csv');
     } else {
       res.send(results);
     }
@@ -395,7 +423,7 @@ app.get('/agendas-nummering', async function(req, res) {
     }
     console.log(`GET /agendas-nummering: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
-      sendCSV(filteredResults, req, res);
+      sendCSV(filteredResults, req, res, 'agendas-nummering.csv');
     } else {
       res.send(filteredResults);
     }
