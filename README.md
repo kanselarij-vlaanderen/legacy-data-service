@@ -21,6 +21,7 @@ legacy-data-service:
     - triplestore:database
   volumes:
     - /path/to/legacy-data-service/:/app/
+    - /path/to/data-folder/data/:/data/
 ```
 
 Note that the `DEV_OS` variable is optional, to enable live reload on Windows.
