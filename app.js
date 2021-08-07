@@ -691,8 +691,26 @@ app.get('/agendas-nummering-sparql-fix', async function(req, res) {
   try {
     let filteredResults = await getFixableAgendas();
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
-    let sparqlString = '';
-    res.send(sparqlString);
+    let finalSparqlString = `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>\n`;
+    let insertSparqlString = `INSERT DATA {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {\n`;
+    let deleteSparqlString = `DELETE DATA {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {\n`;
+    for (const result of filteredResults) {
+      for (const missing of result.wrongNumbers) {
+        for (const potentialFix of result.mededelingen.wrongNumbers) {
+          if (missing.missingNumber === potentialFix.prioriteit) {
+            deleteSparqlString += `    <${potentialFix.agendapunt}> ext:wordtGetoondAlsMededeling "true"^^tl:boolean .\n`;
+            insertSparqlString += `    <${potentialFix.agendapunt}> ext:wordtGetoondAlsMededeling "false"^^tl:boolean .\n`;
+          }
+        }
+      }
+    }
+    deleteSparqlString += `  }\n\}\n`;
+    insertSparqlString += `  }\n\}\n`;
+    finalSparqlString += deleteSparqlString + insertSparqlString;
+    res.send(finalSparqlString);
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
