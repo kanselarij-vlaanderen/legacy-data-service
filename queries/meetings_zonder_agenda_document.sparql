@@ -8,30 +8,34 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT DISTINCT ?meeting ?geplandeStart ?agenda WHERE {
-  {
-    SELECT DISTINCT ?meeting ?geplandeStart WHERE {
-      ?meeting a besluit:Vergaderactiviteit .
-      ?meeting besluit:geplandeStart ?geplandeStart .
-      FILTER NOT EXISTS { ?meeting ext:zittingDocumentversie ?document } .
-    }
-  } UNION {
-    SELECT DISTINCT ?meeting ?geplandeStart WHERE {
-      ?meeting a besluit:Vergaderactiviteit .
-      ?meeting besluit:geplandeStart ?geplandeStart .
-      ?meeting ext:zittingDocumentversie ?documentVersie .
-      ?documentVersie dct:title ?documentTitle .
-      FILTER NOT EXISTS {
-        ?meeting ext:zittingDocumentversie ?agendaDocument.
-        ?agendaDocument dct:title ?agendaDocumentTitle .
-        FILTER ( regex(?agendaDocumentTitle, "VR AGENDA") )
+    {
+      SELECT DISTINCT ?meeting ?geplandeStart WHERE {
+        GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+          ?meeting a besluit:Vergaderactiviteit .
+          ?meeting besluit:geplandeStart ?geplandeStart .
+          FILTER NOT EXISTS { ?meeting ext:zittingDocumentversie ?document } .
+        }
+      }
+    } UNION {
+      SELECT DISTINCT ?meeting ?geplandeStart WHERE {
+        GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+          ?meeting a besluit:Vergaderactiviteit .
+          ?meeting besluit:geplandeStart ?geplandeStart .
+          ?meeting ext:zittingDocumentversie ?documentVersie .
+          ?documentVersie dct:title ?documentTitle .
+          FILTER NOT EXISTS {
+            ?meeting ext:zittingDocumentversie ?agendaDocument.
+            ?agendaDocument dct:title ?agendaDocumentTitle .
+            FILTER ( regex(?agendaDocumentTitle, "VR AGENDA") )
+          }
+        }
       }
     }
-  }
-  ?agenda besluitvorming:isAgendaVoor ?meeting .
-  OPTIONAL { ?agenda dct:created ?agendaCreation } .
-  FILTER NOT EXISTS {
-    ?otherAgenda besluitvorming:isAgendaVoor ?meeting .
-    ?otherAgenda dct:created ?otherAgendaCreation .
-    FILTER ( ?otherAgendaCreation > ?agendaCreation )
-  }
+    ?agenda besluitvorming:isAgendaVoor ?meeting .
+    OPTIONAL { ?agenda dct:created ?agendaCreation } .
+    FILTER NOT EXISTS {
+      ?otherAgenda besluitvorming:isAgendaVoor ?meeting .
+      ?otherAgenda dct:created ?otherAgendaCreation .
+      FILTER ( ?otherAgendaCreation > ?agendaCreation )
+    }
 } ORDER BY ?geplandeStart

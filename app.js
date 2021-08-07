@@ -136,11 +136,9 @@ app.get('/agendapunt-mededelingen-met-verslag', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendapunt_mededelingen_met_verslag.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.mededeling.substring(result.mededeling.lastIndexOf('/') + 1);
@@ -152,11 +150,11 @@ app.get('/agendapunt-mededelingen-met-verslag', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -169,11 +167,9 @@ app.get('/mededelingen-met-DOC', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/mededelingen_met_DOC.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.mededeling.substring(result.mededeling.lastIndexOf('/') + 1);
@@ -183,11 +179,11 @@ app.get('/mededelingen-met-DOC', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -200,11 +196,9 @@ app.get('/agendapunt-bekrachtiging-met-mandataris', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendapunt_bekrachtiging_met_mandataris.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls and get mandataris data
       for (const result of results) {
         if (result.mandataris) {
@@ -224,11 +218,11 @@ app.get('/agendapunt-bekrachtiging-met-mandataris', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -241,11 +235,9 @@ app.get('/documenten-bekrachtiging-niet-publiek', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/documenten_bekrachtiging_niet_publiek.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.agendapunt.substring(result.agendapunt.lastIndexOf('/') + 1);
@@ -255,11 +247,11 @@ app.get('/documenten-bekrachtiging-niet-publiek', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -272,11 +264,9 @@ app.get('/dossiers-goedkeuring', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/dossiers_goedkeuring.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const dossierId = result.dossier.substring(result.dossier.lastIndexOf('/') + 1);
@@ -284,11 +274,11 @@ app.get('/dossiers-goedkeuring', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -301,11 +291,9 @@ app.get('/dossiers-titel-procedurestap', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/dossiers_titel_procedurestap.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const dossierId = result.dossier.substring(result.dossier.lastIndexOf('/') + 1);
@@ -313,11 +301,11 @@ app.get('/dossiers-titel-procedurestap', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -330,11 +318,9 @@ app.get('/agendapunten-zonder-documenten', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendapunten_zonder_documenten.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.agendapunt.substring(result.agendapunt.lastIndexOf('/') + 1);
@@ -344,11 +330,11 @@ app.get('/agendapunten-zonder-documenten', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -361,11 +347,9 @@ app.get('/agendapunten-zonder-documenten-met-beslissing', async function(req, re
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendapunten_zonder_documenten_met_beslissing.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.agendapunt.substring(result.agendapunt.lastIndexOf('/') + 1);
@@ -375,11 +359,11 @@ app.get('/agendapunten-zonder-documenten-met-beslissing', async function(req, re
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -392,11 +376,9 @@ app.get('/agendapunten-zonder-documenten-zonder-beslissing', async function(req,
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendapunten_zonder_documenten_zonder_beslissing.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.agendapunt.substring(result.agendapunt.lastIndexOf('/') + 1);
@@ -406,11 +388,11 @@ app.get('/agendapunten-zonder-documenten-zonder-beslissing', async function(req,
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -423,11 +405,9 @@ app.get('/meetings-zonder-agenda-document', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/meetings_zonder_agenda_document.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
@@ -436,11 +416,11 @@ app.get('/meetings-zonder-agenda-document', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -453,11 +433,9 @@ app.get('/agendapunten-zonder-titel', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendapunten_zonder_titel.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const agendapuntId = result.agendapunt.substring(result.agendapunt.lastIndexOf('/') + 1);
@@ -467,11 +445,11 @@ app.get('/agendapunten-zonder-titel', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -484,11 +462,9 @@ app.get('/agendas-NaN', async function(req, res) {
   const name = req.path.replace('/', '');
   const query = await getQueryFromFile('/app/queries/agendas_NaN.sparql');
   try {
-    let jsonResult = await getLocalJSONFile(name);
-    if (jsonResult) {
-      res.send(jsonResult);
-    } else {
-      let results = await kaleidosData.executeQuery(query, req.query.limit);
+    let results = await getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
       // generate urls
       for (const result of results) {
         const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
@@ -497,11 +473,11 @@ app.get('/agendas-NaN', async function(req, res) {
       }
       console.log(`GET /${name}: ${results.length} results`);
       await writeLocalFile(name, results);
-      if (req.query && req.query.csv) {
-        sendCSV(results, req, res, `${name}.csv`);
-      } else {
-        res.send(results);
-      }
+    }
+    if (req.query && req.query.csv) {
+      sendCSV(results, req, res, `${name}.csv`);
+    } else {
+      res.send(results);
     }
   } catch (e) {
     console.log(e);
@@ -623,82 +599,100 @@ app.get('/agendas-nummering', async function(req, res) {
   }
 });
 
+const getFixableAgendas = async function () {
+  const query = await getQueryFromFile('/app/queries/agendas_nummering.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
+  let jsonResult = await getLocalJSONFile('agendas-nummering');
+  let results;
+  if (jsonResult) {
+    results = jsonResult;
+  } else {
+    results = await kaleidosData.executeQuery(query, req.query.limit);
+    console.log(`GET /${name}: ${results.length} results before filtering`);
+    await writeLocalFile(name, results);
+  }
+  // first group the results per agenda
+  let agendas = {};
+  for (const result of results) {
+    if (result.agenda) {
+      if (!agendas[result.agenda]) {
+        agendas[result.agenda] = {
+          agenda: result.agenda,
+          titel: result.agendaTitel,
+          geplandeStart: result.geplandeStart,
+          meeting: result.meeting,
+          agendapunten: []
+        }
+      }
+      let agendapunt = {
+        agendapunt: result.agendapunt,
+        prioriteit: result.agendapuntPrioriteit
+      };
+      agendas[result.agenda].agendapunten.push(agendapunt);
+    }
+  }
+  // now filter out the agenda's with uninterrupted numbers
+  let filteredResults = [];
+  for (const agendaUrl in agendas) {
+    if (agendas.hasOwnProperty(agendaUrl)) {
+      let { wrongNumbers, doubleNumbers } = checkNumberSequence(agendas[agendaUrl].agendapunten);
+      if (wrongNumbers.length > 0) {
+        agendas[agendaUrl].wrongNumbers = wrongNumbers;
+        // check whether the missing numbers are in the mededelingen
+        agendas[agendaUrl].mededelingen = {};
+        agendas[agendaUrl].mededelingen.mededelingen = await getMededelingenForAgenda(agendaUrl);
+        let mededelingenSequence = checkNumberSequence(agendas[agendaUrl].mededelingen.mededelingen);
+        agendas[agendaUrl].mededelingen.wrongNumbers = mededelingenSequence.wrongNumbers;
+        agendas[agendaUrl].mededelingen.doubleNumbers = mededelingenSequence.doubleNumbers;
+        let fixable = false;
+        for (let wrongNumber of agendas[agendaUrl].wrongNumbers) {
+          for (let wrongMededelingNumber of agendas[agendaUrl].mededelingen.wrongNumbers) {
+            if (wrongNumber.missingNumber === wrongMededelingNumber.prioriteit) {
+              fixable = true;
+            }
+          }
+        }
+        if (fixable && Object.keys(doubleNumbers).length === 0) {
+          filteredResults.push(agendas[agendaUrl]);
+        }
+      }
+    }
+  }
+  // generate urls
+  for (const result of filteredResults) {
+    if (result.meeting && result.agenda) {
+      const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
+      const agendaId = result.agenda.substring(result.agenda.lastIndexOf('/') + 1);
+      result.url = `${BASE_URL}/vergadering/${meetingId}/agenda/${agendaId}/agendapunten`;
+    }
+  }
+  return filteredResults;
+};
+
 /* Problems with the above we can automatically fix */
 app.get('/fixable-agendas-nummering', async function(req, res) {
   const name = req.path.replace('/', '');
-  // this query was optimized by removing all optionals, such as dct:title , since they significantly slowed down the query execution
-  const query = await getQueryFromFile('/app/queries/agendas_nummering.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
   try {
-    let jsonResult = await getLocalJSONFile('agendas-nummering');
-    let results;
-    if (jsonResult) {
-      results = jsonResult;
-    } else {
-      results = await kaleidosData.executeQuery(query, req.query.limit);
-      console.log(`GET /${name}: ${results.length} results before filtering`);
-      await writeLocalFile(name, results);
-    }
-    // first group the results per agenda
-    let agendas = {};
-    for (const result of results) {
-      if (result.agenda) {
-        if (!agendas[result.agenda]) {
-          agendas[result.agenda] = {
-            agenda: result.agenda,
-            titel: result.agendaTitel,
-            geplandeStart: result.geplandeStart,
-            meeting: result.meeting,
-            agendapunten: []
-          }
-        }
-        let agendapunt = {
-          agendapunt: result.agendapunt,
-          prioriteit: result.agendapuntPrioriteit
-        };
-        agendas[result.agenda].agendapunten.push(agendapunt);
-      }
-    }
-    // now filter out the agenda's with uninterrupted numbers
-    let filteredResults = [];
-    for (const agendaUrl in agendas) {
-      if (agendas.hasOwnProperty(agendaUrl)) {
-        let { wrongNumbers, doubleNumbers } = checkNumberSequence(agendas[agendaUrl].agendapunten);
-        if (wrongNumbers.length > 0) {
-          agendas[agendaUrl].wrongNumbers = wrongNumbers;
-          // check whether the missing numbers are in the mededelingen
-          agendas[agendaUrl].mededelingen = {};
-          agendas[agendaUrl].mededelingen.mededelingen = await getMededelingenForAgenda(agendaUrl);
-          let mededelingenSequence = checkNumberSequence(agendas[agendaUrl].mededelingen.mededelingen);
-          agendas[agendaUrl].mededelingen.wrongNumbers = mededelingenSequence.wrongNumbers;
-          agendas[agendaUrl].mededelingen.doubleNumbers = mededelingenSequence.doubleNumbers;
-          let fixable = false;
-          for (let wrongNumber of agendas[agendaUrl].wrongNumbers) {
-            for (let wrongMededelingNumber of agendas[agendaUrl].mededelingen.wrongNumbers) {
-              if (wrongNumber.missingNumber === wrongMededelingNumber.prioriteit) {
-                fixable = true;
-              }
-            }
-          }
-          if (fixable && Object.keys(doubleNumbers).length === 0) {
-            filteredResults.push(agendas[agendaUrl]);
-          }
-        }
-      }
-    }
-    // generate urls
-    for (const result of filteredResults) {
-      if (result.meeting && result.agenda) {
-        const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
-        const agendaId = result.agenda.substring(result.agenda.lastIndexOf('/') + 1);
-        result.url = `${BASE_URL}/vergadering/${meetingId}/agenda/${agendaId}/agendapunten`;
-      }
-    }
+    let filteredResults = await getFixableAgendas();
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
       sendCSV(filteredResults, req, res, `${name}.csv`);
     } else {
       res.send(filteredResults);
     }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
+
+/* Problems with the above we can automatically fix */
+app.get('/agendas-nummering-sparql-fix', async function(req, res) {
+  const name = req.path.replace('/', '');
+  try {
+    let filteredResults = await getFixableAgendas();
+    console.log(`GET /${name}: ${filteredResults.length} filtered results`);
+    let sparqlString = '';
+    res.send(sparqlString);
   } catch (e) {
     console.log(e);
     res.status(500).send(e);

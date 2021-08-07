@@ -8,23 +8,27 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT DISTINCT ?dossier ?title ?shortTitle ?procedurestap ?agendapunt ?agendaPuntTitel WHERE {
-  {
-    SELECT DISTINCT ?dossier ?title WHERE {
-      ?dossier a dossier:Dossier .
-      ?dossier dct:title ?title .
-      FILTER ( regex(?title, "goedkeuring", "i") )
-    }
-  } UNION {
     {
-      SELECT DISTINCT ?dossier ?shortTitle WHERE {
-        ?dossier a dossier:Dossier .
-        ?dossier dct:alternative ?shortTitle .
-        FILTER ( regex(?shortTitle, "goedkeuring", "i") )
+      SELECT DISTINCT ?dossier ?title WHERE {
+        GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+          ?dossier a dossier:Dossier .
+          ?dossier dct:title ?title .
+          FILTER ( regex(?title, "goedkeuring", "i") )
+        }
+      }
+    } UNION {
+      {
+        SELECT DISTINCT ?dossier ?shortTitle WHERE {
+          GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+            ?dossier a dossier:Dossier .
+            ?dossier dct:alternative ?shortTitle .
+            FILTER ( regex(?shortTitle, "goedkeuring", "i") )
+          }
+        }
       }
     }
-  }
-  ?dossier dossier:doorloopt ?procedurestap .
-  ?behandelingVanAgendaPunt ext:beslissingVindtPlaatsTijdens ?procedurestap .
-  ?behandelingVanAgendaPunt besluitvorming:heeftOnderwerp ?agendapunt .
-  ?agendapunt dct:title ?agendaPuntTitel .
+    ?dossier dossier:doorloopt ?procedurestap .
+    ?behandelingVanAgendaPunt ext:beslissingVindtPlaatsTijdens ?procedurestap .
+    ?behandelingVanAgendaPunt besluitvorming:heeftOnderwerp ?agendapunt .
+    ?agendapunt dct:title ?agendaPuntTitel .
 }

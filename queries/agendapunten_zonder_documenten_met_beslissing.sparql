@@ -10,8 +10,10 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 SELECT DISTINCT ?agendapunt ?titel ?agenda ?meeting ?beslissing ?verslag WHERE {
   {
     SELECT DISTINCT ?agendapunt WHERE {
-      ?agendapunt a besluit:Agendapunt .
-      FILTER NOT EXISTS { ?agendapunt besluitvorming:geagendeerdStuk ?document }
+      GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+        ?agendapunt a besluit:Agendapunt .
+        FILTER NOT EXISTS { ?agendapunt besluitvorming:geagendeerdStuk ?document }
+      }
     }
   }
   ?agenda dct:hasPart ?agendapunt .

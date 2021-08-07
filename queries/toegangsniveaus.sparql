@@ -1,4 +1,4 @@
 SELECT * WHERE {
   ?toegangsniveau a <http://mu.semte.ch/vocabularies/ext/ToegangsniveauCode> .
   ?toegangsniveau  ?pred ?obj .
-} LIMIT 1000
+}

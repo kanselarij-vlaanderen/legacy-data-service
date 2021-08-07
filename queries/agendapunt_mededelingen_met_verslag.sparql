@@ -10,11 +10,13 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 SELECT DISTINCT ?mededeling ?titel ?agenda ?meeting ?verslag ?behandelingVanAgendapunt ?beslissing ?dossier ?dossierTitle WHERE {
   {
     SELECT DISTINCT ?mededeling ?titel ?procedurestap WHERE {
-      ?mededeling a besluit:Agendapunt .
-      ?mededeling ext:wordtGetoondAlsMededeling "true"^^tl:boolean .
-      OPTIONAL { ?mededeling dct:title ?titel } .
-      ?agendering besluitvorming:genereertAgendapunt ?mededeling .
-      ?agendering besluitvorming:vindtPlaatsTijdens ?procedurestap .
+      GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+        ?mededeling a besluit:Agendapunt .
+        ?mededeling ext:wordtGetoondAlsMededeling "true"^^tl:boolean .
+        OPTIONAL { ?mededeling dct:title ?titel } .
+        ?agendering besluitvorming:genereertAgendapunt ?mededeling .
+        ?agendering besluitvorming:vindtPlaatsTijdens ?procedurestap .
+      }
     }
   }
   ?behandelingVanAgendapunt besluitvorming:heeftOnderwerp ?mededeling .

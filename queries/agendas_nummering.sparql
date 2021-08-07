@@ -10,9 +10,11 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 SELECT DISTINCT ?geplandeStart ?agendapuntPrioriteit ?agenda ?meeting ?agendapunt WHERE {
   {
     SELECT DISTINCT ?agendapunt ?agendapuntPrioriteit WHERE {
-      ?agendapunt a besluit:Agendapunt .
-      ?agendapunt ext:wordtGetoondAlsMededeling "false"^^tl:boolean .
-      ?agendapunt ext:prioriteit  ?agendapuntPrioriteit .
+      GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+        ?agendapunt a besluit:Agendapunt .
+        ?agendapunt ext:wordtGetoondAlsMededeling "false"^^tl:boolean .
+        ?agendapunt ext:prioriteit  ?agendapuntPrioriteit .
+      }
     }
   }
   ?agenda dct:hasPart ?agendapunt .

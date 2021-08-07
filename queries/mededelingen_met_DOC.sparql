@@ -8,11 +8,13 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT DISTINCT ?mededeling ?mededelingTitel ?document ?title ?agenda ?meeting WHERE {
-  ?mededeling ext:wordtGetoondAlsMededeling "true"^^tl:boolean .
-  ?mededeling besluitvorming:geagendeerdStuk ?document .
-  ?document dct:title ?title .
-  FILTER ( regex(?title, "DOC") )
-  ?agenda dct:hasPart ?mededeling .
-  ?agenda besluitvorming:isAgendaVoor ?meeting .
-  OPTIONAL { ?mededeling dct:title ?mededelingTitel } .
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?mededeling ext:wordtGetoondAlsMededeling "true"^^tl:boolean .
+    ?mededeling besluitvorming:geagendeerdStuk ?document .
+    ?document dct:title ?title .
+    FILTER ( regex(?title, "DOC") )
+    ?agenda dct:hasPart ?mededeling .
+    ?agenda besluitvorming:isAgendaVoor ?meeting .
+    OPTIONAL { ?mededeling dct:title ?mededelingTitel } .
+  }
 }

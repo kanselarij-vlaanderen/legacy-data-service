@@ -8,13 +8,15 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT DISTINCT ?agendapunt ?titel ?agenda ?meeting WHERE {
-  {
-    SELECT DISTINCT ?agendapunt WHERE {
-      ?agendapunt a besluit:Agendapunt .
-      FILTER NOT EXISTS { ?agendapunt besluitvorming:geagendeerdStuk ?document }
+    {
+      SELECT DISTINCT ?agendapunt WHERE {
+        GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+          ?agendapunt a besluit:Agendapunt .
+          FILTER NOT EXISTS { ?agendapunt besluitvorming:geagendeerdStuk ?document }
+        }
+      }
     }
-  }
-  ?agenda dct:hasPart ?agendapunt .
-  ?agenda besluitvorming:isAgendaVoor ?meeting .
-  OPTIONAL { ?agendapunt dct:title ?titel } .
+    ?agenda dct:hasPart ?agendapunt .
+    ?agenda besluitvorming:isAgendaVoor ?meeting .
+    OPTIONAL { ?agendapunt dct:title ?titel } .
 }

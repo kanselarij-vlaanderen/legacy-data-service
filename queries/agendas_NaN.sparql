@@ -4,7 +4,9 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
 
 select DISTINCT ?agenda ?meeting WHERE {
- ?agenda besluitvorming:isAgendaVoor ?meeting .
- ?agenda dct:hasPart ?mededeling .
- ?mededeling ext:prioriteit 0 .
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+   ?agenda besluitvorming:isAgendaVoor ?meeting .
+   ?agenda dct:hasPart ?mededeling .
+   ?mededeling ext:prioriteit 0 .
+ }
 }

@@ -8,12 +8,14 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT DISTINCT ?agendapunt ?agendaPuntTitel ?meeting ?agenda ?document ?title ?toegangsniveauLabel WHERE {
-  ?agendapunt a besluit:Agendapunt .
-  ?agendapunt dct:title ?agendaPuntTitel .
-  ?agenda dct:hasPart ?agendapunt .
-  ?agenda besluitvorming:isAgendaVoor ?meeting .
-  ?agendapunt besluitvorming:geagendeerdStuk ?document .
-  ?document dct:title ?title .
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?agendapunt a besluit:Agendapunt .
+    ?agendapunt dct:title ?agendaPuntTitel .
+    ?agenda dct:hasPart ?agendapunt .
+    ?agenda besluitvorming:isAgendaVoor ?meeting .
+    ?agendapunt besluitvorming:geagendeerdStuk ?document .
+    ?document dct:title ?title .
+  }
   ?document ext:toegangsniveauVoorDocumentVersie ?toegangsniveau .
   ?toegangsniveau skos:prefLabel ?toegangsniveauLabel .
   FILTER ( regex(?agendaPuntTitel, "bekrachtiging", "i") )
