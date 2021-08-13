@@ -8,6 +8,7 @@ import * as path from 'path';
 const BASE_URL = 'http://localhost';
 const CSV_EXPORT_FOLDER = '/data/legacy/';
 const JSON_EXPORT_FOLDER = '/data/legacy/';
+const SPARQL_EXPORT_FOLDER = '/data/legacy/';
 
 const getQueryFromFile = async function (queryPath) {
   let filePath = path.resolve(queryPath);
@@ -103,6 +104,18 @@ const writeLocalFile = async function (name, data) {
   console.log('Local file written to ' + filePath);
 };
 
+/* Some triples for agendapoints occur in multiple graphs. Make sure any changes are applied to all of them */
+const getGraphsForTriple = async function (triple) {
+  const getQuery = `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+select DISTINCT ?g WHERE {
+  GRAPH ?g {
+    ${triple}
+  }
+}`;
+  let results = await kaleidosData.executeQuery(getQuery);
+  return results;
+};
 
 const getMededelingenForAgenda = async function (agendaUrl) {
   const getQuery = `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -691,26 +704,65 @@ app.get('/agendas-nummering-sparql-fix', async function(req, res) {
   try {
     let filteredResults = await getFixableAgendas();
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
-    let finalSparqlString = `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>\n`;
-    let insertSparqlString = `INSERT DATA {
-  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {\n`;
-    let deleteSparqlString = `DELETE DATA {
-  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {\n`;
+    let inserts = {};
+    let deletes = {}
+    let fixedAgendaUrls = [];
     for (const result of filteredResults) {
       for (const missing of result.wrongNumbers) {
         for (const potentialFix of result.mededelingen.wrongNumbers) {
           if (missing.missingNumber === potentialFix.prioriteit) {
-            deleteSparqlString += `    <${potentialFix.agendapunt}> ext:wordtGetoondAlsMededeling "true"^^tl:boolean .\n`;
-            insertSparqlString += `    <${potentialFix.agendapunt}> ext:wordtGetoondAlsMededeling "false"^^tl:boolean .\n`;
+            fixedAgendaUrls.push({ url: result.url, fixedNumber: missing.missingNumber });
+            let originalTriple = `<${potentialFix.agendapunt}> ext:wordtGetoondAlsMededeling "true"^^tl:boolean .`;
+            let graphs = await getGraphsForTriple(originalTriple);
+            if (graphs) {
+              for (const graph of graphs) {
+                if (graph.g) {
+                  // make sure the graph list exists
+                  if (!deletes[graph.g]) {
+                    deletes[graph.g] = [];
+                  }
+                  if (!inserts[graph.g]) {
+                    inserts[graph.g] = [];
+                  }
+                  deletes[graph.g].push(originalTriple);
+                  inserts[graph.g].push(originalTriple.replace('"true"^^tl:boolean', '"false"^^tl:boolean'));
+                }
+              }
+            }
           }
         }
       }
     }
-    deleteSparqlString += `  }\n\}\n`;
-    insertSparqlString += `  }\n\}\n`;
+    let finalSparqlString = `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>\n`;
+    let insertSparqlString = `INSERT DATA {\n`;
+    let deleteSparqlString = `DELETE DATA {\n`;
+    for (const graph in inserts) {
+      if (inserts.hasOwnProperty(graph)) {
+        insertSparqlString += `  GRAPH <${graph}> {\n`;
+        for (const triple of inserts[graph]) {
+          insertSparqlString += `    ${triple}\n`;
+        }
+        insertSparqlString += `  }\n`;
+      }
+    }
+    for (const graph in deletes) {
+      if (deletes.hasOwnProperty(graph)) {
+        deleteSparqlString += `  GRAPH <${graph}> {\n`;
+        for (const triple of deletes[graph]) {
+          deleteSparqlString += `    ${triple}\n`;
+        }
+        deleteSparqlString += `  }\n`;
+      }
+    }
+    deleteSparqlString += `}\n`;
+    insertSparqlString += `}\n`;
     finalSparqlString += deleteSparqlString + insertSparqlString;
-    res.send(finalSparqlString);
+    let timestamp = new Date().toISOString().replace(/[-,T,:]/g, '').split('.')[0];
+    const sparqlFile = `${SPARQL_EXPORT_FOLDER}${timestamp}-agendas-nummering.sparql`;
+    await fsp.writeFile(path.resolve(sparqlFile), finalSparqlString);
+    console.log('.sparql file generated at ' + sparqlFile);
+    res.send({ fixedAgendas: fixedAgendaUrls });
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
