@@ -1,5 +1,27 @@
 import { query, sparqlEscapeUri } from 'mu';
 import { parseSparqlResults } from './parseSparqlResults';
+import { normalizeString } from './similarity';
+import queries from './queries';
+
+/* Get a list with all "normalized" mandataries in the database, to use for matching purposes */
+const getGovernments = async function () {
+  const listQuery = await queries.getQueryFromFile('/app/queries/regeringen.sparql');
+  try {
+    let response = await query(listQuery);
+    let results = parseSparqlResults(response);
+    for (let mandataris of results) {
+      mandataris.normalizedName = mandataris.gebruikteVoornaam && mandataris.familyName? normalizeString(mandataris.gebruikteVoornaam + ' ' + mandataris.familyName, 'name') : undefined,
+      mandataris.normalizedFirstName = mandataris.gebruikteVoornaam ? normalizeString(mandataris.gebruikteVoornaam, 'name') : undefined,
+      mandataris.normalizedFamilyName = mandataris.familyName ? normalizeString(mandataris.familyName, 'name') : undefined,
+      mandataris.normalizedTitel = mandataris.titel ? normalizeString(mandataris.titel, 'title') : undefined
+    }
+    console.log(`${results.length} mandatarissen in themis regeringen`);
+    return results;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 
 /* Get all resources of type mandaat:Mandataris in a specified graph, along with some relevant properties */
 const getMandatarissenInGraph = async function (graph, limit) {
@@ -48,5 +70,6 @@ const getMandatarissen = async function (limit) {
 }
 
 export {
-  getMandatarissen
+  getMandatarissen,
+  getGovernments
 };

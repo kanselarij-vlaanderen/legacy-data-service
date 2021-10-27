@@ -9,5 +9,8 @@
   "author": "Tom De Nies",
   "license": "MIT",
   "dependencies": {
+    "csv-parser": "^3.0.0",
+    "dotenv": "^10.0.0",
+    "fastest-levenshtein": "^1.0.12"
   }
 }

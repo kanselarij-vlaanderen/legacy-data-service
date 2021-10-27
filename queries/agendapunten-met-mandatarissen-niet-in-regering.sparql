@@ -1,0 +1,24 @@
+PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#>
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX persoon: <https://data.vlaanderen.be/ns/persoon#>
+PREFIX g: <https://data.vlaanderen.be/ns/generiek#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX org: <http://www.w3.org/ns/org#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+
+SELECT DISTINCT ?agendapunt ?mandataris WHERE {
+  {
+    SELECT DISTINCT ?mandataris WHERE {
+      GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+        ?mandataris a mandaat:Mandataris .
+        FILTER NOT EXISTS { ?regering prov:hadMember ?mandataris }
+      }
+    }
+  }
+  ?agendapunt ext:heeftBevoegdeVoorAgendapunt ?mandataris .
+}

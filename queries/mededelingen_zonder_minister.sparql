@@ -1,0 +1,22 @@
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+
+SELECT DISTINCT ?agendapunt ?agendapuntTitel ?source ?agenda ?meeting ?agendaPuntAanmaakdatum ?agendaAanmaakdatum ?geplandeStart WHERE {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?agendapunt ext:wordtGetoondAlsMededeling "true"^^tl:boolean .
+    ?agendapunt dct:source ?source .
+    ?agenda dct:hasPart ?agendapunt .
+    ?agenda besluitvorming:isAgendaVoor ?meeting .
+    OPTIONAL { ?agendapunt dct:title ?agendapuntTitel } .
+    OPTIONAL { ?agendapunt besluitvorming:aanmaakdatum ?agendaPuntAanmaakdatum } .
+    OPTIONAL { ?agenda dct:created ?agendaAanmaakdatum } .
+    OPTIONAL { ?meeting besluit:geplandeStart ?geplandeStart } .
+    FILTER NOT EXISTS { ?agendapunt ext:heeftBevoegdeVoorAgendapunt ?mandataris }
+  }
+}
