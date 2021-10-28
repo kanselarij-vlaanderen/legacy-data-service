@@ -10,6 +10,7 @@ const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/'
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 /* Alle themis-conforme regeringen */
+// TODO: replace source graph in regeringen.sparql with the graph containing Themis mandatees within the Kaleidos stack
 router.get('/regeringen', async function(req, res) {
   const name = req.path.replace('/', '');
   if (req.query && req.query.csv) {

@@ -3,8 +3,8 @@ import { distance } from 'fastest-levenshtein';
 // weighting used for all similarities in the final ranking of candidate matches. Total must equal 1
 const SIMILARITY_WEIGHTS = {
   dar_indiener: 0.3,
-  dar_indiener_samenvatting: 0.3,
-  dar_titel_indiener: 0.4
+  dar_indiener_samenvatting: 0.4,
+  dar_titel_indiener: 0.3
 };
 
 // normalize a string/name by converting to lower case, removing double spaces, 'de', 'van', and padding hyphens,
@@ -25,8 +25,8 @@ const normalizeString = function (string, type) {
     normalizedString = normalizedString.replace(/ van den[\s]+/i, ' ');
     normalizedString = normalizedString.replace(/ van de[\s]+/i, ' ');
     normalizedString = normalizedString.replace(/ de[\s]+/i, ' ');
-    normalizedString = normalizedString.replace(/- minister-president/, ''); //at least one Kaleidos mandatary actually had this in the name
-    normalizedString = normalizedString.replace(/schitlz/, 'schiltz'); //an outlier that falls just below the threshold because of this type, easier to correct it this way than adjusting the similarity measure
+    // normalizedString = normalizedString.replace(/- minister-president/, ''); //at least one Kaleidos mandatary actually had this in the name
+    // normalizedString = normalizedString.replace(/schitlz/, 'schiltz'); //an outlier that falls just below the threshold because of this type, easier to correct it this way than adjusting the similarity measure
   }
   if (type === 'title' || type === 'both') {
     // normalizing common patterns such as 'vlaams minister' to 'vm'

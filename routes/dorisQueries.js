@@ -9,6 +9,7 @@ const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/'
 
 // const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
+const MAX_RESULTS = 100000000; // used for debugging pruposes
 
 /* Oplijsten alle mededelingen zonder indienende minister */
 router.get('/mededelingen-zonder-minister', async function(req, res) {
@@ -41,61 +42,156 @@ router.get('/mededelingen-zonder-minister', async function(req, res) {
 
 /* Match a dorisRecord with mandataries in de kaleidosData governments. */
 const findMandatary = function (agendapunt) {
-  let possibleMatches = [];
+  let matches = [];
+  let matchesNeeded = 1;
   let regeringen = kaleidosData.getRegeringen();
   let agendapuntDatum = agendapunt.geplandeStart || agendapunt.agendaAanmaakdatum || agendapunt.agendaPuntAanmaakdatum;
   let lookupDate = new Date(agendapuntDatum);
+  //TODO: sometimes indieners can be double. We also need to make sure that once a minister is matched, it's removed from the search set.
   if (regeringen && agendapunt && agendapunt.dorisRecord) {
-    for (const mandataris of regeringen) {
-      let themisMandataris = { ...mandataris };
-      themisMandataris.scores = {};
-      themisMandataris.startDate = new Date(themisMandataris.mandaatStart).getTime();
-      themisMandataris.endDate = new Date(themisMandataris.mandaatEinde).getTime();
-      if (!lookupDate || (lookupDate >= themisMandataris.startDate && (!themisMandataris.endDate || lookupDate <= themisMandataris.endDate))) {
-        // themisMandataris.distances = {};
-        // compare dar_indiener, dar_indiener_samenvatting, and dar_titel_indiener
+    //it's also possible that multiple mandataries are in DORIS, separated by ';', or that one of the names/titles just has ';' in it... So we need to check all of them
+    let indienerMatchesNeeded = 1, samenvattingMatchesNeeded = 1, titelMatchesNeeded = 1;
+    if (agendapunt.dorisRecord.dar_indiener) {
+      let indieners = agendapunt.dorisRecord.dar_indiener.split(';').filter((item) => { return item.length > 0 }); // just to make sure no weirdness happens with strings that end on ';', for example
+      if (indieners.length > indienerMatchesNeeded) {
+        indienerMatchesNeeded = indieners.length;
+      }
+    }
+    if (agendapunt.dorisRecord.dar_indiener_samenvatting) {
+      let indiener_samenvattingen = agendapunt.dorisRecord.dar_indiener_samenvatting.split(';').filter((item) => { return item.length > 0 });
+      if (indiener_samenvattingen.length > samenvattingMatchesNeeded) {
+        samenvattingMatchesNeeded = indiener_samenvattingen.length;
+      }
+    } else {
+      samenvattingMatchesNeeded = indienerMatchesNeeded;
+    }
+    if (agendapunt.dorisRecord.dar_titel_indiener) {
+      let indiener_titels = agendapunt.dorisRecord.dar_titel_indiener.split(';').filter((item) => { return item.length > 0 });
+      if (indiener_titels.length > titelMatchesNeeded) {
+        titelMatchesNeeded = indiener_titels.length;
+      }
+    } else {
+      titelMatchesNeeded = Math.max(indienerMatchesNeeded, samenvattingMatchesNeeded);
+    }
+    // if any of the matches is not split up, it means this just had ';' in it for another reason
+    matchesNeeded = Math.min(indienerMatchesNeeded, samenvattingMatchesNeeded, titelMatchesNeeded);
+    let indieners = [], samenvattingen = [], titels = [];
+    if (matchesNeeded > 1) {
+      if (agendapunt.dorisRecord.dar_indiener) {
+        indieners = agendapunt.dorisRecord.dar_indiener.split(';').filter((item) => { return item.length > 0 }); // just to make sure no weirdness happens with strings that end on ';', for example
+      }
+      if (agendapunt.dorisRecord.dar_indiener_samenvatting) {
+        samenvattingen = agendapunt.dorisRecord.dar_indiener_samenvatting.split(';').filter((item) => { return item.length > 0 });
+      }
+      if (agendapunt.dorisRecord.dar_titel_indiener) {
+        titels = agendapunt.dorisRecord.dar_titel_indiener.split(';').filter((item) => { return item.length > 0 });
+      }
+      // check if they're all the same length
+      if ((indieners.length && samenvattingen.length && indieners.length !== samenvattingen.length) ||
+        (indieners.length && titels.length && indieners.length !== titels.length) ||
+        (samenvattingen.length && titels.length && samenvattingen.length !== titels.length)) {
+        console.error(`ERROR: indiener metadata lengths not the same for ${agendapunt.dorisId}`);
+        console.log(`indieners (${indieners.length}): ${agendapunt.dorisRecord.dar_indiener}`);
+        console.log(`samenvattingen (${samenvattingen.length}): ${agendapunt.dorisRecord.dar_indiener_samenvatting}`);
+        console.log(`titels (${titels.length}): ${agendapunt.dorisRecord.dar_titel_indiener}`);
+      }
+    } else {
+      // handle edge cases where two VM's are concatenated in DORIS
+      // e.g., "dar_titel_indiener": "VM Financien, Begroting en Gezondheidsbeleid, VM Buitenlands Beleid,   Europese Aangelegenheden, Wetenschap en Technologie, mini",
+      // e.g., "dar_titel_indiener": "Minister-president, VM Onderwijs en Ambtenarenzaken"
+      let edgeCaseMatches = agendapunt.dorisRecord.dar_titel_indiener.split('VM ').filter((item) => { return item.length > 0; });
+      if (agendapunt.dorisRecord.dar_titel_indiener && edgeCaseMatches && edgeCaseMatches.length > 1) {
+        matchesNeeded = edgeCaseMatches.length;
+        // console.log(`MATCH edge case: ${agendapunt.dorisRecord.dar_titel_indiener}`);
         if (agendapunt.dorisRecord.dar_indiener) {
-          let similarity = getSimilarity(agendapunt.dorisRecord.dar_indiener, themisMandataris.normalizedName, 'name');
-          themisMandataris.scores.dar_indiener = similarity;
-        }
-        if (agendapunt.dorisRecord.dar_indiener_samenvatting) {
-          let similarity = getSimilarity(agendapunt.dorisRecord.dar_indiener_samenvatting, themisMandataris.normalizedName + ' ' + themisMandataris.normalizedTitel, 'both');
-          themisMandataris.scores.dar_indiener_samenvatting = similarity;
+          indieners = agendapunt.dorisRecord.dar_indiener.split(', ').filter((item) => { return item.length > 0 }).slice(0, matchesNeeded);
         }
         if (agendapunt.dorisRecord.dar_titel_indiener) {
-          let similarity = getSimilarity(agendapunt.dorisRecord.dar_titel_indiener, themisMandataris.normalizedTitel, 'title');
-          themisMandataris.scores.dar_titel_indiener = similarity;
+          titels = agendapunt.dorisRecord.dar_titel_indiener.split('VM ').filter((item) => { return item.length > 0 }).map((item) => { return 'VM ' + item; });
         }
-        // Some properties are required to have at least some similarity, such as the name or familyName. Otherwise we get nonsense matches based on title or first name alone.
-        // However, if for example only the title is set and it has a good score, we can include the match, as this likely means there was no name set in Kaleidos.
-        // Similarly, if only the name/familyName match, but the title match is low, it could mean there's just not much difference in the name, such as 'Coens' and 'Geens', which only have a string distance of 2.
-        themisMandataris.score = getWeightedScore(themisMandataris.scores);
-        // TODO: find optimal threshold
-        if (themisMandataris.score > 0.5) {
-          possibleMatches.push(themisMandataris);
+        if (agendapunt.dorisRecord.dar_indiener_samenvatting) {
+          // it's too hard splitting out the real string in this edge case. Just concatenate the indiener and title
+          samenvattingen = [];
+          for (let i = 0; i < matchesNeeded; i++) {
+            samenvattingen.push(`${indieners[i]} - ${titels[i]}`);
+            console.log(`${indieners[i]} - ${titels[i]}`);
+          }
+        }
+        // console.log('----');
+      } else {
+        if (agendapunt.dorisRecord.dar_indiener) {
+          indieners = [agendapunt.dorisRecord.dar_indiener];
+        }
+        if (agendapunt.dorisRecord.dar_indiener_samenvatting) {
+          samenvattingen = [agendapunt.dorisRecord.dar_indiener_samenvatting];
+        }
+        if (agendapunt.dorisRecord.dar_titel_indiener) {
+          titels = [agendapunt.dorisRecord.dar_titel_indiener];
         }
       }
     }
+
+    for (let i = 0; i < matchesNeeded; i++) {
+      let possibleMatches = [];
+      for (const mandataris of regeringen) {
+        let themisMandataris = { ...mandataris };
+        themisMandataris.scores = {};
+        themisMandataris.startDate = new Date(themisMandataris.mandaatStart).getTime();
+        themisMandataris.endDate = new Date(themisMandataris.mandaatEinde).getTime();
+        if (!lookupDate || (lookupDate >= themisMandataris.startDate && (!themisMandataris.endDate || lookupDate <= themisMandataris.endDate))) {
+          // compare dar_indiener, dar_indiener_samenvatting, and dar_titel_indiener
+          if (indieners[i]) {
+            let similarity = Math.max(
+              getSimilarity(indieners[i], themisMandataris.normalizedName, 'name'),
+              getSimilarity(indieners[i], themisMandataris.normalizedReversedName, 'name')
+            );
+            if (!themisMandataris.scores.dar_indiener || similarity > themisMandataris.scores.dar_indiener) {
+              themisMandataris.scores.dar_indiener = similarity;
+            }
+          }
+          if (samenvattingen[i]) {
+            let similarity = Math.max(
+              getSimilarity(samenvattingen[i], themisMandataris.normalizedName + ' ' + themisMandataris.normalizedTitel, 'both'),
+              getSimilarity(samenvattingen[i], themisMandataris.normalizedReversedName + ' ' + themisMandataris.normalizedTitel, 'both')
+            );
+            if (!themisMandataris.scores.dar_indiener_samenvatting || similarity > themisMandataris.scores.dar_indiener_samenvatting) {
+              themisMandataris.scores.dar_indiener_samenvatting = similarity;
+            }
+          }
+          if (titels[i]) {
+            let similarity = getSimilarity(titels[i], themisMandataris.normalizedTitel, 'title');
+            if (!themisMandataris.scores.dar_titel_indiener || similarity > themisMandataris.scores.dar_titel_indiener) {
+              themisMandataris.scores.dar_titel_indiener = similarity;
+            }
+          }
+          themisMandataris.score = getWeightedScore(themisMandataris.scores);
+          // TODO: find optimal threshold
+          if (themisMandataris.score > 0.21) { // this threshold was carefully selected to exclude wrong results! Modify at your own risk!
+            possibleMatches.push(themisMandataris);
+          }
+        }
+      }
+      if (possibleMatches.length > 0) {
+        // now we need to rank the results and select the best one.
+        possibleMatches.sort((a, b) => {
+          return b.score - a.score;
+        });
+        matches.push(possibleMatches[0]);
+      }
+    }
   }
-  if (possibleMatches.length > 0) {
-    // now we need to rank the results and return the best one.
-    possibleMatches.sort((a, b) => {
-      return b.score - a.score;
-    });
-    return possibleMatches[0];
-  } else {
-    return undefined;
-  }
+  return matches;
 };
 
-/* Oplijsten alle mededelingen zonder indienende minister mét overeenkomstige record in DORIS */
-router.get('/mededelingen-zonder-minister-met-DORIS', async function(req, res) {
-  const name = req.path.replace('/', '');
+let dorisMatches = []
+const getDORISMatches = async function () {
+  console.log('Matching DORIS metadata...');
+  const name = 'mededelingen-zonder-minister-met-DORIS';
   const query = await queries.getQueryFromFile('/app/queries/mededelingen_zonder_minister.sparql');
   try {
     let results = await caching.getLocalJSONFile(name);
     if (!results) {
-      results = await kaleidosData.executeQuery(query, req.query.limit);
+      results = await kaleidosData.executeQuery(query);
       // generate urls
       for (const result of results) {
         const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
@@ -106,8 +202,9 @@ router.get('/mededelingen-zonder-minister-met-DORIS', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     let filteredResults = [];
-    let unmatchedResults = [];
+    let noDorisRecords = [];
     let multipleResults = [];
+    let noMatchResults = [];
     let noMandataryResults = [];
     let count = 0;
     for (let result of results) {
@@ -133,31 +230,59 @@ router.get('/mededelingen-zonder-minister-met-DORIS', async function(req, res) {
               }
             }
           }
-          if (dar_indiener || dar_titel_indiener || dar_indiener_samenvatting) {
-            result.bestMatch = findMandatary(result);
-            if (result.bestMatch) {
+          if (count < MAX_RESULTS && (dar_indiener || dar_titel_indiener || dar_indiener_samenvatting)) {
+            result.matches = findMandatary(result);
+            if (result.matches && result.matches.length > 0) {
+              let minScore;
+              for (const match of result.matches) {
+                if (!minScore || match.score < minScore) {
+                  minScore = match.score;
+                }
+              }
+              result.minScore = minScore;
               filteredResults.push(result);
+            } else {
+              noMatchResults.push(result);
             }
           } else {
             noMandataryResults.push(result);
           }
         } else {
-          unmatchedResults.push(dorisId);
+          noDorisRecords.push(dorisId);
         }
       }
     }
-    console.log(`${unmatchedResults.length} Results had no DORIS match`);
+    // order the results with the lowest score first, for easy inspection of the quality of the matches
+    filteredResults.sort((a, b) => {
+      return a.minScore - b.minScore;
+    });
+    console.log(`${noDorisRecords.length} Results had no corresponding DORIS record`);
     console.log(`${noMandataryResults.length} Results had no information about the mandatary specified in DORIS`);
+    console.log(`${noMatchResults.length} Results had no match in DORIS`);
     console.log(`${multipleResults.length} Results had more than one DORIS match (with a non-identical mandatary)`);
-    console.log(`GET /${name}: ${filteredResults.length} results`);
-    if (req.query && req.query.csv) {
-      sendCSV(filteredResults, req, res, `${name}.csv`);
-    } else {
-      res.send(filteredResults);
-    }
+    dorisMatches = filteredResults;
   } catch (e) {
     console.log(e);
-    res.status(500).send(e);
+  }
+};
+
+/* Oplijsten alle mededelingen zonder indienende minister mét overeenkomstige record in DORIS */
+router.get('/mededelingen-zonder-minister-met-DORIS', async function(req, res) {
+  const name = req.path.replace('/', '');
+  if (dorisMatches.length === 0 || (req.query && req.query.force)) {
+    await getDORISMatches();
+  }
+  console.log(`GET /${name}: ${dorisMatches.length} results`);
+  let results = [];
+  if (req.query && +req.query.limit) {
+    results = dorisMatches.slice(0, +req.query.limit);
+  } else {
+    results = dorisMatches;
+  }
+  if (req.query && req.query.csv) {
+    sendCSV(results, req, res, `${name}.csv`);
+  } else {
+    res.send(results);
   }
 });
 

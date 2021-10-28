@@ -10,10 +10,12 @@ const getGovernments = async function () {
     let response = await query(listQuery);
     let results = parseSparqlResults(response);
     for (let mandataris of results) {
-      mandataris.normalizedName = mandataris.gebruikteVoornaam && mandataris.familyName? normalizeString(mandataris.gebruikteVoornaam + ' ' + mandataris.familyName, 'name') : undefined,
-      mandataris.normalizedFirstName = mandataris.gebruikteVoornaam ? normalizeString(mandataris.gebruikteVoornaam, 'name') : undefined,
-      mandataris.normalizedFamilyName = mandataris.familyName ? normalizeString(mandataris.familyName, 'name') : undefined,
-      mandataris.normalizedTitel = mandataris.titel ? normalizeString(mandataris.titel, 'title') : undefined
+      mandataris.normalizedName = mandataris.gebruikteVoornaam && mandataris.familyName? normalizeString(mandataris.gebruikteVoornaam + ' ' + mandataris.familyName, 'name') : undefined;
+      // REMARK: note that in DORIS, family names sometimes came first
+      mandataris.normalizedReversedName = mandataris.gebruikteVoornaam && mandataris.familyName? normalizeString(mandataris.familyName + ' ' + mandataris.gebruikteVoornaam, 'name') : undefined;
+      mandataris.normalizedFirstName = mandataris.gebruikteVoornaam ? normalizeString(mandataris.gebruikteVoornaam, 'name') : undefined;
+      mandataris.normalizedFamilyName = mandataris.familyName ? normalizeString(mandataris.familyName, 'name') : undefined;
+      mandataris.normalizedTitel = mandataris.titel ? normalizeString(mandataris.titel, 'title') : undefined;
     }
     console.log(`${results.length} mandatarissen in themis regeringen`);
     return results;
