@@ -5,6 +5,7 @@ import caching from '../util/caching';
 import queries from '../util/queries';
 import dorisMetadata from '../util/dorisMetadata';
 import { getSimilarity, getWeightedScore } from '../util/similarity';
+import csv from '../util/csv';
 const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/';
 
 // const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
@@ -114,7 +115,7 @@ const findMandatary = function (agendapunt) {
           samenvattingen = [];
           for (let i = 0; i < matchesNeeded; i++) {
             samenvattingen.push(`${indieners[i]} - ${titels[i]}`);
-            console.log(`${indieners[i]} - ${titels[i]}`);
+            // console.log(`${indieners[i]} - ${titels[i]}`);
           }
         }
         // console.log('----');
@@ -256,10 +257,11 @@ const getDORISMatches = async function () {
     filteredResults.sort((a, b) => {
       return a.minScore - b.minScore;
     });
-    console.log(`${noDorisRecords.length} Results had no corresponding DORIS record`);
-    console.log(`${noMandataryResults.length} Results had no information about the mandatary specified in DORIS`);
-    console.log(`${noMatchResults.length} Results had no match in DORIS`);
-    console.log(`${multipleResults.length} Results had more than one DORIS match (with a non-identical mandatary)`);
+    console.log(`In totaal zijn er ${noDorisRecords.length} mededelingen met ontbrekende mandataris.`);
+    console.log(`- ${noMandataryResults.length} hiervan hebben ook geen informatie over de indiener in DORIS, en kunnen dus niet automatisch opgelost worden`);
+    console.log(`- ${multipleResults.length} hiervan hadden meer dan overeenstemmend 1 DORIS document (met niet-identieke indiener)`);
+    console.log(`- ${noMatchResults.length} hiervan kon het algoritme niet op basis van de informatie in DORIS matchen met een mandataris in Kaleidos`);
+    console.log(`- ${filteredResults.length} hiervan konden wel gematcht worden met een mandataris in Kaleidos, met een voldoende hoge zekerheid om accuraat te zijn`);
     dorisMatches = filteredResults;
   } catch (e) {
     console.log(e);
@@ -280,7 +282,7 @@ router.get('/mededelingen-zonder-minister-met-DORIS', async function(req, res) {
     results = dorisMatches;
   }
   if (req.query && req.query.csv) {
-    sendCSV(results, req, res, `${name}.csv`);
+    csv.sendCSV(results, req, res, `${name}.csv`);
   } else {
     res.send(results);
   }

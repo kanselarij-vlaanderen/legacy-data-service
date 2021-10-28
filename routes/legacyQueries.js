@@ -3,6 +3,7 @@ const router = express.Router();
 import kaleidosData from '../util/kaleidosData';
 import queries from '../util/queries';
 import caching from '../util/caching';
+import csv from '../util/csv';
 
 /* See queries/*.sparql for the individual queries. Many of them return a large number of results, so subqueries had to be used to avoid a timeout */
 
@@ -32,7 +33,7 @@ router.get('/agendapunt-mededelingen-met-verslag', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -61,7 +62,7 @@ router.get('/mededelingen-met-DOC', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -100,7 +101,7 @@ router.get('/agendapunt-bekrachtiging-met-mandataris', async function(req, res) 
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -129,7 +130,7 @@ router.get('/documenten-bekrachtiging-niet-publiek', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -156,7 +157,7 @@ router.get('/dossiers-goedkeuring', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -183,7 +184,7 @@ router.get('/dossiers-titel-procedurestap', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -212,7 +213,7 @@ router.get('/agendapunten-zonder-documenten', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -241,7 +242,7 @@ router.get('/agendapunten-zonder-documenten-met-beslissing', async function(req,
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -270,7 +271,7 @@ router.get('/agendapunten-zonder-documenten-zonder-beslissing', async function(r
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -298,7 +299,7 @@ router.get('/meetings-zonder-agenda-document', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -327,7 +328,7 @@ router.get('/agendapunten-zonder-titel', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -355,7 +356,7 @@ router.get('/agendas-NaN', async function(req, res) {
       await caching.writeLocalFile(name, results);
     }
     if (req.query && req.query.csv) {
-      sendCSV(results, req, res, `${name}.csv`);
+      csv.sendCSV(results, req, res, `${name}.csv`);
     } else {
       res.send(results);
     }
@@ -469,7 +470,7 @@ router.get('/agendas-nummering', async function(req, res) {
     }
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
-      sendCSV(filteredResults, req, res, `${name}.csv`);
+      csv.sendCSV(filteredResults, req, res, `${name}.csv`);
     } else {
       res.send(filteredResults);
     }
@@ -555,7 +556,7 @@ router.get('/fixable-agendas-nummering', async function(req, res) {
     let filteredResults = await getFixableAgendas();
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
-      sendCSV(filteredResults, req, res, `${name}.csv`);
+      csv.sendCSV(filteredResults, req, res, `${name}.csv`);
     } else {
       res.send(filteredResults);
     }

@@ -4,6 +4,7 @@ import kaleidosData from '../util/kaleidosData';
 import caching from '../util/caching';
 import queries from '../util/queries';
 import dorisMetadata from '../util/dorisMetadata';
+import csv from '../util/csv';
 const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/';
 
 // const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
