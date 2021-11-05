@@ -69,6 +69,21 @@ export default {
     return results;
   },
 
+  getDorisIds: async function (resourceUrl) {
+    const getQuery = `PREFIX dct: <http://purl.org/dc/terms/>
+
+  select DISTINCT ?dorisId WHERE {
+   <${resourceUrl}> dct:source ?dorisId .
+  }`;
+    let results = await this.executeQuery(getQuery);
+    if (results && results.length > 0) {
+      return results.map((result) => {
+        return result.dorisId.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '');
+      });
+    }
+    return [];
+  },
+
   /* Some triples for agendapoints occur in multiple graphs. Make sure any changes are applied to all of them */
   getGraphsForTriple: async function (triple) {
     const getQuery = `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
