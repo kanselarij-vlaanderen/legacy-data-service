@@ -7,17 +7,22 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
-SELECT DISTINCT ?geplandeStart ?agendapuntPrioriteit ?agenda ?meeting ?agendapunt WHERE {
+SELECT DISTINCT ?title ?geplandeStart ?agendapuntPrioriteit ?agenda ?meeting ?agendapunt WHERE {
   {
-    SELECT DISTINCT ?agendapunt ?agendapuntPrioriteit WHERE {
-      GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
-        ?agendapunt a besluit:Agendapunt .
-        ?agendapunt ext:wordtGetoondAlsMededeling "false"^^tl:boolean .
-        ?agendapunt ext:prioriteit  ?agendapuntPrioriteit .
+    SELECT DISTINCT ?geplandeStart ?agendapuntPrioriteit ?agenda ?meeting ?agendapunt WHERE {
+      {
+        SELECT DISTINCT ?agendapunt ?agendapuntPrioriteit WHERE {
+          GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+            ?agendapunt a besluit:Agendapunt .
+            ?agendapunt ext:wordtGetoondAlsMededeling "false"^^tl:boolean .
+            ?agendapunt ext:prioriteit  ?agendapuntPrioriteit .
+          }
+        }
       }
+      ?agenda dct:hasPart ?agendapunt .
+      ?agenda besluitvorming:isAgendaVoor ?meeting .
+      ?meeting besluit:geplandeStart ?geplandeStart .
     }
   }
-  ?agenda dct:hasPart ?agendapunt .
-  ?agenda besluitvorming:isAgendaVoor ?meeting .
-  ?meeting besluit:geplandeStart ?geplandeStart .
+  OPTIONAL { ?agenda dct:title ?title } .
 }
