@@ -69,7 +69,7 @@ router.get('/procedurestappen-met-meer-dossiers', async function(req, res) {
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${resultArray.length} results`);
     if (req.query && req.query.csv) {
-      csv.sendCSV(resultArray, req, res, `${name}.csv`);
+      csv.sendCSV(resultArray, req, res, `${name}.csv`, ['dorisRecords', 'dossiers']);
     } else {
       res.send(resultArray);
     }
@@ -119,7 +119,7 @@ router.get('/mogelijke-potpourri-dossiers', async function(req, res) {
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${resultArray.length} results`);
     if (req.query && req.query.csv) {
-      csv.sendCSV(resultArray, req, res, `${name}.csv`);
+      csv.sendCSV(resultArray, req, res, `${name}.csv`, ['procedurestappen']);
     } else {
       res.send(resultArray);
     }

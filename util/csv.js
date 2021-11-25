@@ -13,7 +13,7 @@ export default {
     // add the headers
     for (const header of headers) {
       if (excludeFields.indexOf(header) === -1) {
-        csvString += `${header};`;
+        csvString += `${header.replace(';','|')};`;
       }
     }
     // remove the last semicolon
@@ -25,13 +25,13 @@ export default {
         if (excludeFields.indexOf(header) === -1) {
           if (item.hasOwnProperty(header)) {
             if (typeof item[header] === 'object') {
-              csvString += `"${JSON.stringify(item[header])}";`;
+              csvString += `"${JSON.stringify(item[header]).replace(';','|')}";`;
             } else if (item[header] !== undefined && ('' + item[header]).indexOf('http') === 0) {
-              csvString += `${item[header]};`;
+              csvString += `${item[header].replace(';','|')};`;
             } else {
               if (item[header] !== undefined && ('' + item[header]).indexOf('"') > -1) {
                 console.log('WARNING: data contains double quotes which were replaced by single quotes');
-                item[header] = ('' + item[header]).replace(/"/g, '\'');
+                item[header] = ('' + item[header]).replace(/"/g, '\'').replace(';','|');
               }
               csvString += `"${item[header]}";`;
             }
