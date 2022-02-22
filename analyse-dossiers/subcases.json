@@ -1,0 +1,1593 @@
+{
+  "data": [
+    {
+      "attributes": {
+        "title": "ICT-contract 2008  Gunning van het gemeenschappelijk ICT-dienstverleningsaanbod ten behoeve van  de diensten van de Vlaamse overheid - bestek nummer SCICT-2008-01",
+        "created": "2007-12-21T12:00:00+01:00",
+        "modified": "2007-12-21T12:00:00+01:00",
+        "show-as-remark": false,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a0795fa-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a0795fa-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0795fa-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Centraal Financieringsorgaan  Lijst van de Vlaamse agentschappen die in 2008 aangesloten zijn bij de  cashpooling van het Centraal Financieringsorgaan (CFO)",
+        "created": "2007-12-21T12:00:00+01:00",
+        "modified": "2007-12-21T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a077552-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a077552-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077552-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Grondwettelijk Hof, rolnummer 4323  Prejudiciële vraag over artikel 31 van het decreet van het Waalse Gewest van  2 april 1998 houdende wijziging van de organieke wet van 8 juli 1976  betreffende de openbare centra  voor maatschappelijk welzijn, gesteld  door de Raad van State",
+        "created": "2007-12-21T12:00:00+01:00",
+        "modified": "2007-12-21T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a07725a-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a07725a-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a07725a-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Snel degeneratieve aandoening  Resolutie betreffende de creatie van opvangplaatsen en een snelprocedure voor  personen met een snel degeneratieve aandoening (SDA), aangenomen door het  Vlaams Parlement op 12 december 2007",
+        "created": "2007-12-21T12:00:00+01:00",
+        "modified": "2007-12-21T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a077bec-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a077bec-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a077bec-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Alternatieve  financiering van openbare vervoersprojecten fase 1  Project Brabo: tramlijn Deurne-Wijnegem fase 1 (inclusief de stelplaats  Deurne) en tramlijn Mortsel-Boechout fase 2 - Beslissing van de Vlaamse Regering van 19 oktober 2007 (VR/PV/2007/36 - punt  23) - Resultaat technisch nazicht",
+        "created": "2007-12-14T12:00:00+01:00",
+        "modified": "2007-12-14T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a063638-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a063638-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063638-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Commissie  Benchmarking Vlaanderen inzake de uitvoering van het benchmarkingconvenant:  jaarverslag 2006",
+        "created": "2007-12-14T12:00:00+01:00",
+        "modified": "2007-12-14T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a063ec6-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a063ec6-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a063ec6-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "ICT-contract  2008  Gunning van het gemeenschappelijk ICT-dienstverleningsaanbod ten behoeve van  de diensten van de Vlaamse overheid — bestek nummer SCICT-2008-01",
+        "created": "2007-12-14T12:00:00+01:00",
+        "modified": "2007-12-14T12:00:00+01:00",
+        "show-as-remark": false,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a067fc6-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a067fc6-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a067fc6-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Stedenbouwkundige  voorschriften bij ruimtelijke uitvoeringsplannen - Voorontwerp van besluit van de Vlaamse Regering tot vaststelling van nadere  regels met betrekking tot de vorm en de inhoud van de ruimtelijke  uitvoeringsplannen, principieel goedgekeurd door de Vlaamse Regering op 19  juli 2007 (VR/PV/2007/28 - punt 64) - Resultaat technisch nazicht",
+        "created": "2007-12-14T12:00:00+01:00",
+        "modified": "2007-12-14T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a06394e-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a06394e-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a06394e-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Competentiepool IncGEO: verlenging van het  convenant tot en met 31 december 2008  Ontwerpaddendum aan het convenant met betrekking tot het Incubatiepunt voor  Geoinformatie tussen de Vlaamse Regering en het Instituut voor de  Aanmoediging van Innovatie door Wetenschap en Technologie in Vlaanderen  (IWT-Vlaanderen) en de vzw Incubatiepunt voor Geoinformatie",
+        "created": "2007-12-07T12:00:00+01:00",
+        "modified": "2007-12-07T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a05a024-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a05a024-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a024-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Transnationale Universiteit Limburg  A. Evaluatie van het verdrag tussen het Koninkrijk der Nederlanden en de  Vlaamse Gemeenschap van België  B. Gezamenlijke beleidsreactie namens de Nederlandse minister van Onderwijs,  Cultuur en Wetenschap, de heer Ronald Plasterk en de Vlaamse minister van  Werk, Onderwijs en Vorming, de heer Frank Vandenbroucke",
+        "created": "2007-12-07T12:00:00+01:00",
+        "modified": "2007-12-07T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a05a736-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a05a736-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05a736-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Zending van ministers Kris Peeters en Geert  Bourgeois naar Barcelona (15-16 november 2007) - Vlaams voorzitterschap  REGLEG in 2008: verslag",
+        "created": "2007-12-07T12:00:00+01:00",
+        "modified": "2007-12-07T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a059d86-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a059d86-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a059d86-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Doorlichting  van het Vlaamse innovatie-instrumentarium: eindrapport van de expertgroep",
+        "created": "2007-11-30T12:00:00+01:00",
+        "modified": "2007-11-30T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a053620-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a053620-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a053620-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "PAB-gebruikers:  combinatiemogelijkheden van het Persoonlijke Assistentie Budget met Kortverblijf en Logeerdagen  Resultaat onderzoek m.b.t. het consumptiegedrag van PAB-gebruikers",
+        "created": "2007-11-30T12:00:00+01:00",
+        "modified": "2007-11-30T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a052dec-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a052dec-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a052dec-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Ministerieel  werkbezoek van minister Bert Anciaux aan Berlijn (30 november 2007 - 2  december 2007): programma",
+        "created": "2007-11-30T12:00:00+01:00",
+        "modified": "2007-11-30T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a0548c2-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a0548c2-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0548c2-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Uitvoering  begroting: toestand oktober 2007  A. Maandelijkse schatkisttoestand van het Vlaams ministerie van Financiën  en Begroting  B. Nieuwsbrief kasbeheer",
+        "created": "2007-11-30T12:00:00+01:00",
+        "modified": "2007-11-30T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a05308a-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a05308a-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a05308a-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Jeugdwerkloosheid  Met redenen omklede motie tot besluit van de op 18 oktober 2007 door de dames  Mieke Vogels en Agnes Bruyninckx in commissie gehouden interpellaties tot de  heer Frank   Vandenbroucke, viceminister-president van de Vlaamse Regering, Vlaams  minister van Werk, Onderwijs en Vorming, over de aanpak van de  jeugdwerkloosheid, in het bijzonder wat het zogenaamde Oostendse model  betreft, aangenomen door het Vlaams Parlement op 7 november 2007",
+        "created": "2007-11-23T12:00:00+01:00",
+        "modified": "2007-11-23T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a04b33a-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a04b33a-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b33a-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "‘Strategisch Arbeidsmarktonderzoek in  Vlaanderen - VIONA 2007’: geselecteerde projecten",
+        "created": "2007-11-23T12:00:00+01:00",
+        "modified": "2007-11-23T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a04b5ec-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a04b5ec-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04b5ec-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Verslaggeving over de in-, uit- en doorvoer van en  bestrijding van illegale handel in wapens, munitie en speciaal voor militair  gebruik of voor ordehandhaving dienstig materieel en daaraan verbonden  technologie, evenals van de producten en technologieën voor tweeërlei gebruik",
+        "created": "2007-11-23T12:00:00+01:00",
+        "modified": "2007-11-23T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a04cda2-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a04cda2-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04cda2-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Mededelingen van de Vlaamse overheid op de VRT:  toepasselijk regelgevend kader",
+        "created": "2007-11-23T12:00:00+01:00",
+        "modified": "2007-11-23T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a04bb32-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a04bb32-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a04bb32-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "title": "Vlaams Indicatorenboek Wetenschap, Technologie en Innovatie 2007",
+        "created": "2007-11-14T12:00:00+01:00",
+        "modified": "2007-11-14T12:00:00+01:00",
+        "show-as-remark": true,
+        "uri": "http://kanselarij.vo.data.gift/id/procedurestappen/5a0482a2-dec1-11e9-aa72-0242c0a80002"
+      },
+      "id": "5a0482a2-dec1-11e9-aa72-0242c0a80002",
+      "type": "subcases",
+      "relationships": {
+        "mandatees": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/mandatees?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/mandatees"
+          }
+        },
+        "linked-pieces": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/linked-pieces?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/linked-pieces"
+          }
+        },
+        "agenda-activities": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/agenda-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/agenda-activities"
+          }
+        },
+        "submission-activities": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/submission-activities?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/submission-activities"
+          }
+        },
+        "treatments": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/treatments?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/treatments"
+          }
+        },
+        "case": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/case?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/case"
+          }
+        },
+        "requested-for-meeting": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/requested-for-meeting?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/requested-for-meeting"
+          }
+        },
+        "access-level": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/access-level?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/access-level"
+          }
+        },
+        "type": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/type?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/type"
+          }
+        },
+        "requested-by": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/requested-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/requested-by"
+          }
+        },
+        "modified-by": {
+          "links": {
+            "self": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/links/modified-by?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+            "related": "/subcases/5a0482a2-dec1-11e9-aa72-0242c0a80002/modified-by"
+          }
+        }
+      }
+    }
+  ],
+  "links": {
+    "next": "//subcases?page[number]=1&filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+    "last": "//subcases?page[number]=6&filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+    "first": "//subcases?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created",
+    "self": "subcases?filter[case][id]=81209eec-dec2-11e9-aa72-0242c0a80002&sort=-created"
+  },
+  "meta": {
+    "count": 122
+  }
+}

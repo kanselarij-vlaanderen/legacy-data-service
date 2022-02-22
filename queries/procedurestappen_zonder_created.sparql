@@ -1,0 +1,15 @@
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+
+SELECT COUNT(DISTINCT ?procedurestap) COUNT(DISTINCT ?dossier) WHERE {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?dossier dossier:doorloopt ?procedurestap .
+    FILTER NOT EXISTS { ?procedurestap dct:created ?created }
+  }
+}
