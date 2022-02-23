@@ -14,11 +14,9 @@ DOC/DEC/MED: Document Decreet Mededeling
 
 # Studie code https://github.com/kanselarij-vlaanderen/kaleidos-legacy-conversion
 
-- src/convertor/lib/config/vr_export_parsing_map.py
+object_name en dar_vorige worden gebruikt om documenten te linken aan elkaar
 
-parser p_doc_list --> dar_rel_docs en dar_vorige worden gebruikt om documenten te linken aan elkaar
-
-- src/convertor/lib/doris_export_parsers.py
+Een mogelijke fout was dat voor documenten uit het formaat hierboven (DOC), er een match kan zijn wanneer het jaartal en de identifier overeenkomen. Voor mededelingen (MED) is dit echter niet zo. Dit laatste is informatie die op het moment van de conversie nog niet geweten was.
 
 # Aanpak:
 1. Oplijsten alle procedurestappen met meer dan 1 dossier
@@ -27,7 +25,7 @@ parser p_doc_list --> dar_rel_docs en dar_vorige worden gebruikt om documenten t
 
 # 1. Oplijsten alle procedurestappen met meer dan 1 dossier
 
-De query `queries\alle_mogelijke_potpourri_dossiers.sparql`, geeft alle dossiers weer waarvan minstens 1 procedurestap ook in een ander dossier zit. Dit geeft echter zeer veel resultaten (16227), waarbij er sommige dossiers honderden procedurestapppen hebben, en sommige maar 1.
+De query `queries\alle_mogelijke_potpourri_dossiers.sparql`, geeft alle dossiers weer waarvan minstens 1 procedurestap ook in een ander dossier zit. Dit geeft echter zeer veel resultaten (16227), waarbij er sommige dossiers honderden procedurestappen hebben, en sommige maar 1.
 
 `queries\potpourri_stats.sparql` geeft wat meer inzicht. In het resultaat van deze query zien we bijvoorbeeld dat er 1 procedurestap is die in maar liefst 20 dossiers zit, 12 procedurestappen die in 19 dossiers zitten, 12 in 18 dossiers, ..., en tenslotte 8488 procedurestappen die slechts in 2 dossiers zitten.
 
@@ -70,15 +68,68 @@ Als ik in de query enkel de procedurestappen beschouw die een `dct:created` datu
 Hier bestaat een mogelijke oplossing er uit om op basis van de DORIS nummers de grote dossiers op te splitsen.
 
 We moeten per dossier de DORIS brondata voor alle procedurestappen in dat dossier bekijken, ook diegene die enkel in dit dossier zitten (het kan immers dat deze ook niet relevant zijn aan de rest).
-Dan moeten we dit dossier opsplitsen in dossiers met procedurestapppen die een duidelijke link hebben in DORIS.
+Dan moeten we dit dossier opsplitsen in dossiers met procedurestappen die een duidelijke link hebben in DORIS.
 
 Dit doen we met `queries\procedurestappen_in_potpourri_dossiers.sparql`, die 18172 unieke procedurestappen teruggeeft.
 
-Een hint naar een mogelijke fout die gemaakt werd bij de conversie is te vinden in http://localhost:8889/potpourri-document-nrs , waar we zien dat zeer veel procedurestappen als `dar_document_nr` `VR/JJJJ/DD/MM/DOC.xxxxx` hebben meegekregen in DORIS. Als deze blijken samengenomen te zijn om deze reden, dan kan dit veel verklaren.
+Vervolgens hebben we een algoritme geschreven, dat per dossier alle procedurestappen overloopt, en probeert een geldige 'ketting' te maken op basis van `object_name` en `dar_vorige` uit de DORIS brondata. De eerste procedurestap waarvoor dit lukt, beschouwen we als de 'main' procedurestap, i.e., de procedurestap die er voor gezorgd heeft dat het dossier kan worden gevormd.
 
-Mogelijks kunnen we ook kijken naar afstand in datums, gemeenschappelijke woorden in titel, indieners, ... al kan dit ook verkeerde resultaten geven.
+Vindt het algoritme zo geen ketting, dan gaan we er van uit dat dit geen correct dossier is.
 
-http://localhost:8889/mogelijke-potpourri-dossiers geeft de volledige lijst van alle mogelijke potpourri dossiers, met al hun procedurestappen en bijhorende DORIS records gevonden op basis van `dct:source`.
+http://localhost:8889/mogelijke-potpourri-dossiers geeft de volledige lijst van alle mogelijke potpourri dossiers - valid EN invalid - met al hun procedurestappen en bijhorende DORIS records gevonden op basis van `dct:source`.
+
+http://localhost:8889/mogelijke-potpourri-dossiers?validationMatch=valid geeft alle gevalideerde dossiers weer, terwijl http://localhost:8889/mogelijke-potpourri-dossiers?validationMatch=invalid alle als foutief gedetecteerde dossiers weergeeft.
+
+Voorlopig heeft dit als resultaat dat er 229 dossiers zijn die alvast als incorrect worden gedetecteerd. We zitten echter nog met vals positieven, zowel als vasl negatieven. Er zijn immers dossiers waarbij door een fout ingevoerde `object_name` in DORIS wel een juiste ketting kon gemaakt worden, maar die eigenlijk niet bij elkaar horen. Er zijn ook nog dossiers waarbij geen exacte ketting kon gevonden worden via `object_name` en/of `dar_vorige`, maar die wel duidelijk bij elkaar horen.
+
+Meer specifiek krijgen we deze statistieken voor de huidige als incorrect gedetecteerde dossiers:
+
+```
+{
+  "Totaal aantal dossiers": 229,
+  "Aantal dossiers met 122 procedurestappen": 1,
+  "Aantal dossiers met 86 procedurestappen": 1,
+  "Aantal dossiers met 61 procedurestappen": 1,
+  "Aantal dossiers met 55 procedurestappen": 1,
+  "Aantal dossiers met 50 procedurestappen": 1,
+  "Aantal dossiers met 46 procedurestappen": 1,
+  "Aantal dossiers met 39 procedurestappen": 1,
+  "Aantal dossiers met 36 procedurestappen": 2,
+  "Aantal dossiers met 35 procedurestappen": 1,
+  "Aantal dossiers met 34 procedurestappen": 1,
+  "Aantal dossiers met 33 procedurestappen": 1,
+  "Aantal dossiers met 32 procedurestappen": 1,
+  "Aantal dossiers met 31 procedurestappen": 2,
+  "Aantal dossiers met 30 procedurestappen": 2,
+  "Aantal dossiers met 29 procedurestappen": 3,
+  "Aantal dossiers met 26 procedurestappen": 1,
+  "Aantal dossiers met 23 procedurestappen": 3,
+  "Aantal dossiers met 22 procedurestappen": 2,
+  "Aantal dossiers met 21 procedurestappen": 1,
+  "Aantal dossiers met 19 procedurestappen": 2,
+  "Aantal dossiers met 18 procedurestappen": 1,
+  "Aantal dossiers met 17 procedurestappen": 5,
+  "Aantal dossiers met 16 procedurestappen": 5,
+  "Aantal dossiers met 15 procedurestappen": 4,
+  "Aantal dossiers met 14 procedurestappen": 4,
+  "Aantal dossiers met 13 procedurestappen": 2,
+  "Aantal dossiers met 12 procedurestappen": 5,
+  "Aantal dossiers met 11 procedurestappen": 4,
+  "Aantal dossiers met 10 procedurestappen": 3,
+  "Aantal dossiers met 9 procedurestappen": 9,
+  "Aantal dossiers met 8 procedurestappen": 10,
+  "Aantal dossiers met 7 procedurestappen": 10,
+  "Aantal dossiers met 6 procedurestappen": 8,
+  "Aantal dossiers met 5 procedurestappen": 16,
+  "Aantal dossiers met 4 procedurestappen": 27,
+  "Aantal dossiers met 3 procedurestappen": 38,
+  "Aantal dossiers met 2 procedurestappen": 49
+}
+```
+
+Hoe meer procedurestappen in een dossier, hoe kleiner de kans op een vals negatief resultaat. M.a.w., tussen de dossiers met 2 procedurestappen zitten er wellicht nog goede.
+
+Mogelijks kunnen we als volgende stap ook kijken naar afstand in datums, gemeenschappelijke woorden in titel, indieners, ... al kan dit ook verkeerde resultaten geven.
 
 ## 2. Dossiers met 1 enkele procedurestap, waarbij die laatste wel in verscheidene dossiers is opgenomen.
 
@@ -91,3 +142,5 @@ Zo tel ik er in de test-db 6217.
 Hier bestaat een mogelijke oplossing er uit om op basis van de DORIS nummers de procedurestappen in 1 enkel dossier samen te nemen.
 
 Dit is makkelijker te checken dan het eerste geval, aangezien het aantal dossiers en het aantal procedurestappen hier identiek zijn. We kunnen deze lijst dus overlopen, en voor elke procedurestap de DORIS records bekijken.
+
+To be continued...

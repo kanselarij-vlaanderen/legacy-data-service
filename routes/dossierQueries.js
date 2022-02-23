@@ -175,6 +175,22 @@ const getSourceIds = function (sourceIdString) {
   });;
 };
 
+/* Returns true if id1 contains id2 (case-insensitive) or vice-versa
+OR if id1 and id2 both contain 'DOC', AND have matching year and identifier */
+const docRegex = /[A-Z][A-Z] ([0-9][0-9][0-9][0-9]).*DOC\.([0-9][0-9][0-9][0-9]).*/;
+const compareIds = function (id1, id2) {
+  if (id1.indexOf('DOC') > -1 && id2.indexOf('DOC') > -1) {
+    let doc1Ids = id1.match(docRegex);
+    let doc2Ids = id2.match(docRegex);
+    if (doc1Ids && doc2Ids && doc1Ids.length > 2 && doc1Ids.length === doc2Ids.length) {
+      if (doc1Ids[1] === doc2Ids[1] && doc1Ids[2] === doc2Ids[2]) {
+        return true;
+      }
+    }
+  }
+  return id1.toUpperCase().indexOf(id2.toUpperCase()) > -1 || id2.toUpperCase().indexOf(id1.toUpperCase()) > -1;
+};
+
 /* Adds a 'Valid' value to mainProcedurestap.valid if the dar_vorige ids are found withing the allProcedurestapppen array.
 If not, the invalid reason is added to mainProcedurestap.valid */
 const checkProcedureChain = function (mainProcedurestap, allProcedurestapppen) {
@@ -185,17 +201,32 @@ const checkProcedureChain = function (mainProcedurestap, allProcedurestapppen) {
   let remainingProcedurestappen = allProcedurestapppen.filter((remainingProcedurestap) => { return remainingProcedurestap.procedurestap !== mainProcedurestap.procedurestap; });
   if (remainingProcedurestappen.length > 0 && vorigeIds.length > 0) {
     let vorigeProcedurestappen = [];
-    for (const procedurestap of allProcedurestapppen) {
-      if (mainProcedurestap.procedurestap !== procedurestap.procedurestap) {
-        for (const id of vorigeIds) {
-          if (procedurestap.object_name && procedurestap.object_name.toUpperCase().indexOf(id) > -1) {
-            vorigeProcedurestappen.push(procedurestap);
-          }
+    for (const procedurestap of remainingProcedurestappen) {
+      for (const id of vorigeIds) {
+        if (procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
+          vorigeProcedurestappen.push(procedurestap);
         }
       }
     }
     if (vorigeProcedurestappen.length === 0) {
-      mainProcedurestap.valid = 'Invalid: no matching procedurestapppen found for dar_vorige ' + vorigeIds;
+      // as a last resort, we can check whether the object_name occurs somewhere else in the same dossier, which would also be valid
+      let objectIds = getSourceIds(mainProcedurestap.object_name);
+      let similarProcedurestappen = [];
+      for (const procedurestap of remainingProcedurestappen) {
+        for (const id of objectIds) {
+          if (procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
+            similarProcedurestappen.push(procedurestap);
+          }
+        }
+      }
+      if (similarProcedurestappen.length === 0) {
+        mainProcedurestap.valid = 'Invalid: no matching procedurestappen found for dar_vorige ' + vorigeIds + ' nor for object_name ' + objectIds;
+      } else {
+        mainProcedurestap.valid = 'Valid';
+        for (const procedurestap of similarProcedurestappen) {
+          checkProcedureChain(procedurestap, remainingProcedurestappen);
+        }
+      }
     } else {
       mainProcedurestap.valid = 'Valid';
       for (const procedurestap of vorigeProcedurestappen) {
@@ -206,37 +237,61 @@ const checkProcedureChain = function (mainProcedurestap, allProcedurestapppen) {
     mainProcedurestap.valid = 'Valid';
   }
 };
-/* Returns a 'Valid' value if all the procedurestappen are valid.
-If not, the invalid reason is returned. */
-const checkDossierIds = function (dossier) {
-  if (dossier && dossier.titel) {
-    // first we need the "main" procedurestap, the one that was used to generate the dossier
-    let mainProcedurestap;
-    for (const procedurestap of dossier.procedurestappen) {
-      if (!mainProcedurestap && procedurestap.titel === dossier.titel) {
-        mainProcedurestap = procedurestap;
+
+const validateDossierChain = function (mainProcedurestap, procedurestappen) {
+  if (mainProcedurestap) {
+    checkProcedureChain(mainProcedurestap, procedurestappen);
+    let dossierValidation = "";
+    let unvalidatedProcedurestappen = [];
+    for (const procedurestap of procedurestappen) {
+      if (procedurestap.valid && procedurestap.valid !== 'Valid') {
+        dossierValidation += procedurestap.valid + ';';
+      } else if (!procedurestap.valid) {
+        unvalidatedProcedurestappen.push(procedurestap);
       }
     }
-    if (mainProcedurestap) {
-      checkProcedureChain(mainProcedurestap, dossier.procedurestappen);
-      let dossierValidation = "";
-      for (const procedurestap of dossier.procedurestappen) {
-        if (procedurestap.valid && procedurestap.valid !== 'Valid') {
-          dossierValidation += procedurestap.valid + ';';
-        }
-      }
-      if (dossierValidation.length > 0) {
-        return dossierValidation.substring(0, dossierValidation.length - 1);
-      } else {
-        return 'Valid';
-      }
+    if (unvalidatedProcedurestappen.length > 0) {
+      dossierValidation += 'Invalid: ' + unvalidatedProcedurestappen.length + ' procedurestappen not found in chain;';
+    }
+    if (dossierValidation.length > 0) {
+      return dossierValidation.substring(0, dossierValidation.length - 1);
     } else {
-      return 'Invalid: main procedurestap not found';
+      return 'Valid';
     }
   } else {
-    return 'Invalid: no title';
+    // the title may be missing, or have been altered by someone. We need to try every procedurestap as "main", and check if it produces a valid chain
+    return 'Invalid: main procedurestap not found';
   }
-  return 'Valid';
+};
+
+/* Returns a 'Valid' value if all the procedurestappen are valid.
+If not, the invalid reason is returned. */
+const validateDossier = function (dossier) {
+  if (dossier) {
+    // unfortunately we can't always find the "main" procedurestap, the one that was used to generate the dossier
+    // the title may be missing, there may be duplicate titles, or the title have been altered by someone.
+    // We need to try every procedurestap as "main", and check if it produces a valid chain
+    let dossierValidations = [];
+    for (const procedurestap of dossier.procedurestappen) {
+      let dossierValidation = validateDossierChain(procedurestap, dossier.procedurestappen);
+      // as soon as we find one correct chain of procedurestappen, we can stop
+      if (dossierValidation === 'Valid') {
+        dossierValidations.push(dossierValidation);
+        break;
+      } else {
+        // store the invalid reason
+        dossierValidations.push(dossierValidation);
+      }
+    }
+    if (dossierValidations.indexOf('Valid') > -1) {
+      dossier.mainProcedurestap = dossier.procedurestappen[dossierValidations.indexOf('Valid')];
+      return 'Valid';
+    } else {
+      return 'Invalid: no correct chain of procedurestappen could be found.';
+    }
+  } else {
+    return 'Invalid: no dossier';
+  }
 };
 
 const getPotPourriDossiers = async function (limit, includeDorisProps, aantalProcedurestappen, sortOrder, validationMatch) {
@@ -326,32 +381,49 @@ const getPotPourriDossiers = async function (limit, includeDorisProps, aantalPro
       return b.aantalProcedurestappen - a.aantalProcedurestappen;
     }
   });
-  if (!limit) {
-    limit = resultArray.length;
-  }
-  resultArray = resultArray.slice(0, limit);
   for (let i = 0; i < resultArray.length; i++) {
     resultArray[i] = {
-      valid: checkDossierIds(resultArray[i]),
+      valid: validateDossier(resultArray[i]),
       ...resultArray[i]
     }
   }
   // filter out the valid/invalid results if needed
   if (validationMatch && validationMatch.length > 0) {
-    resultArray = resultArray.filter((result) => { return !result.valid || result.valid.toLowerCase().indexOf(validationMatch.toLowerCase()) > -1; });
+    if (validationMatch.toLowerCase() === 'valid') {
+      resultArray = resultArray.filter((result) => { return result.valid.toLowerCase() === 'valid'; });
+    } else {
+      resultArray = resultArray.filter((result) => { return !result.valid || result.valid.toLowerCase().indexOf(validationMatch.toLowerCase()) > -1; });
+    }
   }
-  return resultArray;
+  let stats = {
+    'Totaal aantal dossiers': resultArray.length
+  };
+  for (const dossier of resultArray) {
+    let statTitle = 'Aantal dossiers met ' + dossier.aantalProcedurestappen + ' procedurestappen';
+    if (!stats[statTitle]) {
+      stats[statTitle] = 0;
+    }
+    stats[statTitle]++;
+  }
+  if (!limit) {
+    limit = resultArray.length;
+  }
+  resultArray = resultArray.slice(0, limit);
+  return {
+    stats: stats,
+    dossiers: resultArray
+  };
 };
 
 router.get('/mogelijke-potpourri-dossiers', async function(req, res) {
   try {
-    let resultArray = await getPotPourriDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch);
+    let result = await getPotPourriDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch);
     const name = req.path.replace('/', '');
-    console.log(`GET /${name}: ${resultArray.length} results`);
+    console.log(`GET /${name}: ${result.dossiers.length} results`);
     if (req.query && req.query.csv) {
-      csv.sendCSV(resultArray, req, res, `${name}.csv`, ['procedurestappen']);
+      csv.sendCSV(result.dossiers, req, res, `${name}.csv`, ['procedurestappen']);
     } else {
-      res.send(resultArray);
+      res.send(result);
     }
   } catch (e) {
     console.log(e);
