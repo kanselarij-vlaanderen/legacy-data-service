@@ -127,9 +127,11 @@ Meer specifiek krijgen we deze statistieken voor de huidige als incorrect gedete
 }
 ```
 
-Hoe meer procedurestappen in een dossier, hoe kleiner de kans op een vals negatief resultaat. M.a.w., tussen de dossiers met 2 procedurestappen zitten er wellicht nog goede.
+Hoe meer procedurestappen in een dossier, hoe kleiner de kans op een vals negatief resultaat. M.a.w., tussen de dossiers met 2 procedurestappen zitten er wellicht nog goede. Bijvoorbeeld dossier http://themis.vlaanderen.be/id/dossier/8178aa38-dec2-11e9-aa72-0242c0a80002 heeft 2 procedurestappen die wel degelijk bij elkaar horen, maar geen link hebben via `object_name` of `dar_vorige`. In dit specifiek geval lijkt er gelinkt geweest te zijn via `dar_rel_docs` in plaats van `dar_vorige`.
 
-Mogelijks kunnen we als volgende stap ook kijken naar afstand in datums, gemeenschappelijke woorden in titel, indieners, ... al kan dit ook verkeerde resultaten geven.
+Mogelijks kunnen we als volgende stap ook kijken naar `dar_rel_docs`, eventueel gecombineerd met afstand in datums, gemeenschappelijke woorden in titel, indieners, ... al kan dit ook verkeerde resultaten geven.
+
+Wat we wel kunnen concluderen, is dat we in ieder geval er in zullen slagen om de meest foutieve dossiers te identificeren en te verwijderen of corrigeren.
 
 ## 2. Dossiers met 1 enkele procedurestap, waarbij die laatste wel in verscheidene dossiers is opgenomen.
 
