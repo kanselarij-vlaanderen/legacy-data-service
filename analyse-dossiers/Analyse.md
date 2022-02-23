@@ -80,8 +80,6 @@ Mogelijks kunnen we ook kijken naar afstand in datums, gemeenschappelijke woorde
 
 http://localhost:8889/mogelijke-potpourri-dossiers geeft de volledige lijst van alle mogelijke potpourri dossiers, met al hun procedurestappen en bijhorende DORIS records gevonden op basis van `dct:source`.
 
-http://localhost:8889/potpourri-dossiers-doris-links geeft dezelfde lijst, maar dan met enkel de `dar_document_nr`, `dar_vorige` en `dar_rel_docs` links per procedurestap (dit is iets overzichtelijker).
-
 ## 2. Dossiers met 1 enkele procedurestap, waarbij die laatste wel in verscheidene dossiers is opgenomen.
 
 Zie `queries\mogelijke_gesplitte_dossiers.sparql`.

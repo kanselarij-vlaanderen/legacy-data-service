@@ -6,11 +6,12 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+PREFIX adms: <http://www.w3.org/ns/adms#>
 
-SELECT DISTINCT ?dossier ?dossierTitel ?procedurestap ?created ?source ?procedurestapTitle WHERE {
+SELECT DISTINCT ?dossier ?dossierTitle ?dossierIdentifier ?procedurestap ?created ?source ?procedurestapTitle WHERE {
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
     {
-      SELECT DISTINCT ?dossier COUNT(DISTINCT ?procedurestap) as ?aantalProcedurestappen ?dossierTitel WHERE {
+      SELECT DISTINCT ?dossier COUNT(DISTINCT ?procedurestap) as ?aantalProcedurestappen ?dossierTitle ?dossierIdentifier WHERE {
         {
           SELECT DISTINCT ?verdachteProcedurestap WHERE {
             {
@@ -27,7 +28,8 @@ SELECT DISTINCT ?dossier ?dossierTitel ?procedurestap ?created ?source ?procedur
         ?dossier dossier:doorloopt ?verdachteProcedurestap .
         ?dossier dossier:doorloopt ?procedurestap .
         ?procedurestap dct:created ?created .
-        OPTIONAL { ?dossier dct:title ?dossierTitel . }
+        OPTIONAL { ?dossier dct:title ?dossierTitle . }
+        OPTIONAL { ?dossier adms:identifier ?dossierIdentifier . }
       } ORDER BY DESC(?aantalProcedurestappen)
     }
     FILTER (?aantalProcedurestappen > 1)
