@@ -4,7 +4,7 @@ import kaleidosData from '../util/kaleidosData';
 import caching from '../util/caching';
 import queries from '../util/queries';
 import dorisMetadata from '../util/dorisMetadata';
-import { getSimilarity, getWeightedScore } from '../util/similarity';
+import { getSimilarity, normalizeString } from '../util/similarity';
 import csv from '../util/csv';
 const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/';
 
@@ -142,6 +142,7 @@ const getProcedureStappenInPotpourriDossiers = async function (limit) {
     }
     await caching.writeLocalFile(name, results);
   }
+  console.log('procedurestappen_in_potpourri_dossiers: ' + results.length + ' results.');
   return results;
 };
 
@@ -160,6 +161,9 @@ const getSourceIds = function (sourceIdString) {
       if (id.toUpperCase().indexOf('BIS') > -1) {
         return id.substring(0, id.toUpperCase().lastIndexOf('BIS'));
       }
+      if (id.toUpperCase().indexOf('TER') > -1) {
+        return id.substring(0, id.toUpperCase().lastIndexOf('TER'));
+      }
       return id;
     });
   }
@@ -177,13 +181,14 @@ const getSourceIds = function (sourceIdString) {
 
 /* Returns true if id1 contains id2 (case-insensitive) or vice-versa
 OR if id1 and id2 both contain 'DOC', AND have matching year and identifier */
-const docRegex = /[A-Z][A-Z] ([0-9][0-9][0-9][0-9]).*DOC\.([0-9][0-9][0-9][0-9]).*/;
+const docRegex = /[A-Z][A-Z] ([0-9][0-9][0-9][0-9]).*DOC\.([0-9]?[0-9]?[0-9]?[0-9]?).*/;
 const compareIds = function (id1, id2) {
   if (id1.indexOf('DOC') > -1 && id2.indexOf('DOC') > -1) {
     let doc1Ids = id1.match(docRegex);
     let doc2Ids = id2.match(docRegex);
     if (doc1Ids && doc2Ids && doc1Ids.length > 2 && doc1Ids.length === doc2Ids.length) {
-      if (doc1Ids[1] === doc2Ids[1] && doc1Ids[2] === doc2Ids[2]) {
+      // the identifier could have an inconsistently used prefix 0 (e.g., 0472 vs 472), so we compare both the string values and numerical values
+      if (doc1Ids[1] === doc2Ids[1] && (doc1Ids[2] === doc2Ids[2] || (!isNaN(doc1Ids[2]) && !isNaN(doc2Ids[2]) && +doc1Ids[2] === +doc2Ids[2]))) {
         return true;
       }
     }
@@ -191,112 +196,277 @@ const compareIds = function (id1, id2) {
   return id1.toUpperCase().indexOf(id2.toUpperCase()) > -1 || id2.toUpperCase().indexOf(id1.toUpperCase()) > -1;
 };
 
-/* Adds a 'Valid' value to mainProcedurestap.valid if the dar_vorige ids are found withing the allProcedurestapppen array.
-If not, the invalid reason is added to mainProcedurestap.valid */
-const checkProcedureChain = function (mainProcedurestap, allProcedurestapppen) {
-  // now we need to follow the dar_vorige identifiers.
-  // check the dar_document_nr and/or object_name, at least one of the two must be non-empty AND NOT contain 'VR/JJJJ/DD/MM/',
-  // AND be present in either dar_rel_docs or dar_vorige of all of the other procedurestappen
-  let vorigeIds = getSourceIds(mainProcedurestap.dar_vorige);
-  let remainingProcedurestappen = allProcedurestapppen.filter((remainingProcedurestap) => { return remainingProcedurestap.procedurestap !== mainProcedurestap.procedurestap; });
-  if (remainingProcedurestappen.length > 0 && vorigeIds.length > 0) {
-    let vorigeProcedurestappen = [];
-    for (const procedurestap of remainingProcedurestappen) {
-      for (const id of vorigeIds) {
-        if (procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
-          vorigeProcedurestappen.push(procedurestap);
-        }
+const compareStrings = function (string1, string2) {
+  if (string1 && string2) {
+    if (string1.length > 3 && string2.length > 3 && normalizeString(string2).indexOf(normalizeString(string1)) > -1 || normalizeString(string1).indexOf(normalizeString(string2)) > -1) {
+      if (normalizeString(string2) === normalizeString(string1)) {
+        return 1;
       }
+      return 0.9;
     }
-    if (vorigeProcedurestappen.length === 0) {
-      // as a last resort, we can check whether the object_name occurs somewhere else in the same dossier, which would also be valid
-      let objectIds = getSourceIds(mainProcedurestap.object_name);
-      let similarProcedurestappen = [];
-      for (const procedurestap of remainingProcedurestappen) {
-        for (const id of objectIds) {
-          if (procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
-            similarProcedurestappen.push(procedurestap);
+    return getSimilarity(string1, string2);
+  }
+  return 0;
+};
+
+/* Get a 'real' chain of procedurestappen using dar_vorige, dar_aanvullend and dar_rel_docs */
+const getProcedureChain = function (startProcedurestap, allProcedurestappen, currentChain, thresholds) {
+  // we need to know which steps are already in the chain
+  let newChain = [startProcedurestap];
+  let newChainIds = [startProcedurestap.procedurestap];
+  let currentChainIds = currentChain.map((procedurestap) => { return procedurestap.procedurestap; });
+  // first we need to follow the dar_vorige & dar_rel_docs identifiers.
+  let vorigeIds = getSourceIds(startProcedurestap.dar_vorige);
+  let relDocIds = getSourceIds(startProcedurestap.dar_rel_docs);
+  let aanvullendIds = getSourceIds(startProcedurestap.dar_aanvullend);
+  // merge the two arrays
+  let relevantIds = [];
+  for (const id of vorigeIds) {
+    if (relevantIds.indexOf(id) === -1) {
+      relevantIds.push(id);
+    }
+  }
+  for (const id of relDocIds) {
+    if (relevantIds.indexOf(id) === -1) {
+      relevantIds.push(id);
+    }
+  }
+  for (const id of aanvullendIds) {
+    if (relevantIds.indexOf(id) === -1) {
+      relevantIds.push(id);
+    }
+  }
+  // get all other procedurestappen not currently in the chain
+  let remainingProcedurestappen = allProcedurestappen.filter((remainingProcedurestap) => {
+    return currentChainIds.indexOf(remainingProcedurestap.procedurestap) === -1 && remainingProcedurestap.procedurestap !== startProcedurestap.procedurestap;
+  });
+  if (remainingProcedurestappen.length > 0 && relevantIds.length > 0) {
+    let relevantProcedurestappen = [];
+    // check the object_name and dar_rel_docs of all other procedurestappen
+    for (const procedurestap of remainingProcedurestappen) {
+      let added = false;
+      for (const id of relevantIds) {
+        // in most cases, the id we're looking for should be found in the object_name
+        if (!added && procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
+          relevantProcedurestappen.push(procedurestap);
+          added = true;
+        }
+        // the id can also be in dar_rel_docs in some cases
+        if (!added && procedurestap.dar_rel_docs) {
+          const relDocIds = getSourceIds(procedurestap.dar_rel_docs);
+          for (const relDocId of relDocIds) {
+            if (compareIds(relDocId, id)) {
+              relevantProcedurestappen.push(procedurestap);
+              added = true;
+            }
           }
         }
       }
-      if (similarProcedurestappen.length === 0) {
-        mainProcedurestap.valid = 'Invalid: no matching procedurestappen found for dar_vorige ' + vorigeIds + ' nor for object_name ' + objectIds;
-      } else {
-        mainProcedurestap.valid = 'Valid';
-        for (const procedurestap of similarProcedurestappen) {
-          checkProcedureChain(procedurestap, remainingProcedurestappen);
+    }
+    if (relevantProcedurestappen.length > 0) {
+      // we found links to other procedurestappen further down the chain, which may have their own links
+      for (const procedurestap of relevantProcedurestappen) {
+        const procedureChain = getProcedureChain(procedurestap, remainingProcedurestappen, [...currentChain, ...newChain], thresholds);
+        for (const chainProcedurestap of procedureChain) {
+          if (newChainIds.indexOf(chainProcedurestap.procedurestap) === -1) {
+            newChain.push(chainProcedurestap);
+            newChainIds.push(chainProcedurestap.procedurestap);
+          }
         }
       }
-    } else {
-      mainProcedurestap.valid = 'Valid';
-      for (const procedurestap of vorigeProcedurestappen) {
-        checkProcedureChain(procedurestap, remainingProcedurestappen);
+    }
+  }
+  // if there are no more procedurestappen or relevantIds, we can stop and return the chain
+  return newChain;
+};
+
+// We'll assume the largest chain in the dossier as the 'correct' one, and compare the remaining steps to those in the chain
+// If the object_name, title, dar_keywords, and/or dar_onderwerp match up acceptably, we'll call it valid.
+const validateIncompleteChain = function (dossier, strict, tolerance, thresholds) {
+  if (dossier.maxChain && dossier.startProcedurestap) {
+    const startProcedurestap = dossier.startProcedurestap;
+    // get the current correct chain, and the remaining procedurestappen
+    const correctChain = dossier.maxChain;
+    let remainingProcedurestappen = dossier.procedurestappen.filter((procedurestap) => {
+      for (const correctProcedurestap of correctChain) {
+        if (correctProcedurestap.procedurestap === procedurestap.procedurestap) {
+          return false;
+        }
+      }
+      return true;
+    });
+    dossier.remainingProcedurestappen = remainingProcedurestappen;
+    // get some useful information about the correct chain
+    const relevantProcedurestappen = [];
+    let relevantIds = [];
+    let relevantTitles = [];
+    let relevantSubjects = [];
+    let relevantKeywords = [];
+    for (const correctProcedurestap of correctChain) {
+      let sourceIds = getSourceIds(correctProcedurestap.object_name);
+      for (const sourceId of sourceIds) {
+        if (relevantIds.indexOf(sourceId) === -1) {
+          relevantIds.push(sourceId);
+        }
+      }
+      if (correctProcedurestap.titel && correctProcedurestap.titel.length > 0 && relevantTitles.indexOf(correctProcedurestap.titel) === -1) {
+        relevantTitles.push(correctProcedurestap.titel);
+      }
+      if (correctProcedurestap.dar_onderwerp && correctProcedurestap.dar_onderwerp.length > 0 && relevantSubjects.indexOf(correctProcedurestap.dar_onderwerp) === -1) {
+        relevantSubjects.push(correctProcedurestap.dar_onderwerp);
+      }
+      if (correctProcedurestap.dar_keywords && correctProcedurestap.dar_keywords.length > 0 && relevantKeywords.indexOf(correctProcedurestap.dar_keywords) === -1) {
+        relevantKeywords.push(correctProcedurestap.dar_keywords);
+      }
+    };
+
+    for (const procedurestap of remainingProcedurestappen) {
+      let added = false;
+      procedurestap.maxSimScores = {};
+      // First we can check whether the object_name of a link in the chain occurs somewhere else in the same dossier,
+      // which would also be valid
+      for (const id of relevantIds) {
+        if (procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
+          if (procedurestap.maxSimScores.object_name === undefined) {
+            procedurestap.maxSimScores.object_name = 0;
+          }
+          if (!added && relevantProcedurestappen.indexOf(procedurestap.procedurestap) === -1) {
+            relevantProcedurestappen.push(procedurestap.procedurestap);
+            procedurestap.maxSimScores.object_name = 1;
+            added = true;
+          }
+        }
+      }
+      // we're now entering fuzzy territory... compareStrings returns a value between 0 and 1, and thresholds determines how strict we are.
+      // Finally, we can check whether the title, dar_onderwerp and/or keywords occur somewhere else in the same dossier, which would likely also be valid
+      // it's important we err on the side of caution here. So don't set the threshold too high, or valid dossiers might get deleted
+      for (const title of relevantTitles) {
+        let score = compareStrings(procedurestap.titel, title);
+        if (procedurestap.maxSimScores.title === undefined || score > procedurestap.maxSimScores.title) {
+          procedurestap.maxSimScores.title = score;
+        }
+        if (score >= thresholds.title) {
+          if (!added && relevantProcedurestappen.indexOf(procedurestap.procedurestap) === -1) {
+            relevantProcedurestappen.push(procedurestap.procedurestap);
+            added = true;
+          }
+        }
+      }
+
+      for (const subject of relevantSubjects) {
+        let score = compareStrings(procedurestap.dar_onderwerp, subject);
+        if (procedurestap.maxSimScores.subject === undefined || score > procedurestap.maxSimScores.subject) {
+          procedurestap.maxSimScores.subject = score;
+        }
+        if (score >= thresholds.subject) {
+          if (!added && relevantProcedurestappen.indexOf(procedurestap.procedurestap) === -1) {
+            relevantProcedurestappen.push(procedurestap.procedurestap);
+            added = true;
+          }
+        }
+      }
+
+      for (const keywords of relevantKeywords) {
+        let score = compareStrings(procedurestap.dar_keywords, keywords);
+        if (procedurestap.maxSimScores.keywords === undefined || score > procedurestap.maxSimScores.keywords) {
+          procedurestap.maxSimScores.keywords = score;
+        }
+        if (score >= thresholds.keywords) {
+          if (!added && relevantProcedurestappen.indexOf(procedurestap.procedurestap) === -1) {
+            relevantProcedurestappen.push(procedurestap.procedurestap);
+            added = true;
+          }
+        }
       }
     }
-  } else {
-    mainProcedurestap.valid = 'Valid';
+
+    dossier.relevantProcedurestappen = relevantProcedurestappen;
+    if (dossier.relevantProcedurestappen.length > 0) {
+      for (let i = 0; i < dossier.remainingProcedurestappen.length; i++) {
+        if (dossier.relevantProcedurestappen.indexOf(dossier.remainingProcedurestappen[i].procedurestap) > -1) {
+          dossier.remainingProcedurestappen.splice(i, 1);
+          i--;
+        }
+      }
+    }
   }
 };
 
-const validateDossierChain = function (mainProcedurestap, procedurestappen) {
-  if (mainProcedurestap) {
-    checkProcedureChain(mainProcedurestap, procedurestappen);
-    let dossierValidation = "";
-    let unvalidatedProcedurestappen = [];
-    for (const procedurestap of procedurestappen) {
-      if (procedurestap.valid && procedurestap.valid !== 'Valid') {
-        dossierValidation += procedurestap.valid + ';';
-      } else if (!procedurestap.valid) {
-        unvalidatedProcedurestappen.push(procedurestap);
-      }
-    }
-    if (unvalidatedProcedurestappen.length > 0) {
-      dossierValidation += 'Invalid: ' + unvalidatedProcedurestappen.length + ' procedurestappen not found in chain;';
-    }
-    if (dossierValidation.length > 0) {
-      return dossierValidation.substring(0, dossierValidation.length - 1);
-    } else {
-      return 'Valid';
-    }
-  } else {
-    // the title may be missing, or have been altered by someone. We need to try every procedurestap as "main", and check if it produces a valid chain
-    return 'Invalid: main procedurestap not found';
-  }
-};
 
-/* Returns a 'Valid' value if all the procedurestappen are valid.
-If not, the invalid reason is returned. */
-const validateDossier = function (dossier) {
+const validateDossierByChains = function (dossier, strict, tolerance, thresholds) {
+  if (!tolerance) {
+    tolerance = 0;
+  }
   if (dossier) {
     // unfortunately we can't always find the "main" procedurestap, the one that was used to generate the dossier
     // the title may be missing, there may be duplicate titles, or the title have been altered by someone.
     // We need to try every procedurestap as "main", and check if it produces a valid chain
-    let dossierValidations = [];
     for (const procedurestap of dossier.procedurestappen) {
-      let dossierValidation = validateDossierChain(procedurestap, dossier.procedurestappen);
-      // as soon as we find one correct chain of procedurestappen, we can stop
-      if (dossierValidation === 'Valid') {
-        dossierValidations.push(dossierValidation);
-        break;
+      procedurestap.chain = getProcedureChain(procedurestap, dossier.procedurestappen, [], thresholds);
+    }
+    // now we can check whether there is a procedurestap that leads to a chain that includes all other procedurestappen
+    let maxChain = undefined;
+    let startProcedurestap = undefined;
+    for (const procedurestap of dossier.procedurestappen) {
+      if (procedurestap.chain && procedurestap.chain.length === dossier.procedurestappen.length) {
+        dossier.chain = procedurestap.chain;
+        dossier.startProcedurestap = procedurestap;
+        return 'Valid';
       } else {
-        // store the invalid reason
-        dossierValidations.push(dossierValidation);
+        if (!maxChain || (procedurestap.chain && maxChain.length < procedurestap.chain.length)) {
+          maxChain = procedurestap.chain;
+          dossier.startProcedurestap = procedurestap;
+        }
       }
     }
-    if (dossierValidations.indexOf('Valid') > -1) {
-      dossier.mainProcedurestap = dossier.procedurestappen[dossierValidations.indexOf('Valid')];
-      return 'Valid';
-    } else {
-      return 'Invalid: no correct chain of procedurestappen could be found.';
+    dossier.maxChain = maxChain;
+
+    // if we got here, there's no full chain in the dossier. We can perform some other checks to see if the dossier is valid anyway
+    validateIncompleteChain(dossier, strict, tolerance, thresholds);
+    if (dossier.remainingProcedurestappen && dossier.remainingProcedurestappen.length === 0) {
+      return 'Valid (with relevant procedurestappen in incomplete chain)';
     }
+
+    // some mapping to avoid circular JSON structure
+    dossier.maxChain = dossier.maxChain.map((procedurestap) => { return procedurestap.procedurestap; });
+    for (let procedurestap of dossier.procedurestappen) {
+      procedurestap.chain = procedurestap.chain.map((chainProcedurestap) => { return chainProcedurestap.procedurestap; });
+    }
+
+    if (!strict) {
+      if (dossier.maxChain.length >= dossier.procedurestappen.length - tolerance) {
+        return 'Valid (disregarding ' + tolerance + ' step' + (tolerance > 1 ? 's' : '') + ')';
+      }
+      for (const procedurestap of dossier.procedurestappen) {
+        if (procedurestap.dar_vorige && procedurestap.dar_vorige.length > 0) {
+          return 'Invalid: no complete chain of procedurestappen found.';
+        }
+      }
+    }
+    return 'Invalid: no complete chain of procedurestappen found.';
   } else {
     return 'Invalid: no dossier';
   }
+}
+
+const getAantalDossiersForProcedurestap = async function (procedurestap) {
+  const aantalDossiersQuery = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+  SELECT COUNT(DISTINCT ?dossier) as ?aantalDossiers WHERE {
+    ?dossier dossier:doorloopt <${procedurestap}> .
+  }`;
+  let result = await kaleidosData.executeQuery(aantalDossiersQuery);
+  if (result && result[0]) {
+    return result[0].aantalDossiers;
+  }
+  return 0;
 };
 
-const getPotPourriDossiers = async function (limit, includeDorisProps, aantalProcedurestappen, sortOrder, validationMatch) {
+const getPotPourriDossiers = async function (limit, includeDorisProps, aantalProcedurestappen, sortOrder, validationMatch, strict, tolerance, thresholds) {
   if (!includeDorisProps) {
-    includeDorisProps = ['dar_document_nr','dar_vorige', 'dar_rel_docs', 'object_name'];// these are the ones we need for dossier-matching
+    includeDorisProps = ['dar_document_nr','dar_vorige', 'dar_rel_docs', 'object_name', 'dar_keywords', 'dar_onderwerp', 'dar_aanvullend'];// these are the ones we need for dossier-matching
+  }
+  if (tolerance === undefined || isNaN(tolerance)) {
+    tolerance = 0;
   }
   let results = await getProcedureStappenInPotpourriDossiers(limit);
   // group the results by dossier
@@ -383,28 +553,41 @@ const getPotPourriDossiers = async function (limit, includeDorisProps, aantalPro
   });
   for (let i = 0; i < resultArray.length; i++) {
     resultArray[i] = {
-      valid: validateDossier(resultArray[i]),
+      valid: validateDossierByChains(resultArray[i], strict, tolerance, thresholds),
       ...resultArray[i]
     }
   }
   // filter out the valid/invalid results if needed
   if (validationMatch && validationMatch.length > 0) {
     if (validationMatch.toLowerCase() === 'valid') {
-      resultArray = resultArray.filter((result) => { return result.valid.toLowerCase() === 'valid'; });
+      resultArray = resultArray.filter((result) => { return result.valid.toLowerCase() === 'valid' || result.valid.toLowerCase() === 'valid (not strict)'; });
     } else {
-      resultArray = resultArray.filter((result) => { return !result.valid || result.valid.toLowerCase().indexOf(validationMatch.toLowerCase()) > -1; });
+      resultArray = resultArray.filter((result) => { return (!result.valid || result.valid.toLowerCase().indexOf(validationMatch.toLowerCase()) > -1); });
     }
   }
   let stats = {
-    'Totaal aantal dossiers': resultArray.length
+    'Totaal aantal dossiers': resultArray.length,
+    thresholds: thresholds
   };
+  let totaalAantalProcedurestappen = 0;
   for (const dossier of resultArray) {
     let statTitle = 'Aantal dossiers met ' + dossier.aantalProcedurestappen + ' procedurestappen';
     if (!stats[statTitle]) {
       stats[statTitle] = 0;
     }
     stats[statTitle]++;
+    totaalAantalProcedurestappen += dossier.aantalProcedurestappen;
+    for (const procedurestap of dossier.procedurestappen) {
+      procedurestap.aantalDossiers = await getAantalDossiersForProcedurestap(procedurestap.procedurestap);
+      if (!dossier.maxAantalDossiersPerProcedurestap || procedurestap.aantalDossiers > dossier.maxAantalDossiersPerProcedurestap) {
+        dossier.maxAantalDossiersPerProcedurestap = procedurestap.aantalDossiers;
+      }
+      if (!dossier.minAantalDossiersPerProcedurestap || procedurestap.aantalDossiers < dossier.minAantalDossiersPerProcedurestap) {
+        dossier.minAantalDossiersPerProcedurestap = procedurestap.aantalDossiers;
+      }
+    }
   }
+  stats.totaalAantalProcedurestappen = totaalAantalProcedurestappen;
   if (!limit) {
     limit = resultArray.length;
   }
@@ -417,7 +600,12 @@ const getPotPourriDossiers = async function (limit, includeDorisProps, aantalPro
 
 router.get('/mogelijke-potpourri-dossiers', async function(req, res) {
   try {
-    let result = await getPotPourriDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch);
+    let thresholds = {
+      title: req.query.titleThreshold !== undefined ? +req.query.titleThreshold : 0.1,
+      subject: req.query.subjectThreshold !== undefined ? +req.query.subjectThreshold : 0.1,
+      keywords: req.query.keywordsThreshold !== undefined ? +req.query.keywordsThreshold : 0.7,
+    };
+    let result = await getPotPourriDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch, req.query.strict === 'true', +req.query.tolerance, thresholds);
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${result.dossiers.length} results`);
     if (req.query && req.query.csv) {
@@ -425,6 +613,28 @@ router.get('/mogelijke-potpourri-dossiers', async function(req, res) {
     } else {
       res.send(result);
     }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
+
+router.get('/mogelijke-gesplitte-dossiers', async function(req, res) {
+  try {
+    const name = 'mogelijke-gesplitte-dossiers';
+    const query = await queries.getQueryFromFile('/app/queries/mogelijke_gesplitte_dossiers.sparql');
+    let results = await caching.getLocalJSONFile(name);
+    if (!results) {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
+      // generate urls
+      for (const result of results) {
+        const dossierId = result.dossier.substring(result.dossier.lastIndexOf('/') + 1);
+        result.url = `${BASE_URL}/dossiers/${dossierId}/deeldossiers`;
+      }
+      await caching.writeLocalFile(name, results);
+    }
+    console.log('mogelijke_gesplitte_dossiers: ' + results.length + ' results.');
+    res.send(results);
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
