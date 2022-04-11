@@ -48,9 +48,37 @@ const dorisMetadata =  {
     }
   },
 
-  lookup: function (id) {
+  lookup: function (id, includeDorisProps) {
     if (dorisRecords[id]) {
-      return dorisRecords[id];
+      if (dorisRecords[id].length > 1) {
+        // there are a few dorisIds that return multiple results, but only "dar_update" and "dar_pub_date" seem to differ, which doesn't matter for this analysis
+        let unequalKeys = [];
+        for (let i = 0; i < dorisRecords[id].length; i++) {
+          // check all keys for equality (it could be just a double)
+          for (const key in dorisRecords[id][i]) {
+            if (dorisRecords[id][i].hasOwnProperty(key) && (!includeDorisProps || includeDorisProps.indexOf(key) > -1)) {
+              for (let j = 0; j < dorisRecords[id].length; j++) {
+                if (unequalKeys.indexOf(key) === -1 && i !== j && dorisRecords[id][j][key] !== dorisRecords[id][i][key]) {
+                  unequalKeys.push(key);
+                }
+              }
+            }
+          }
+        }
+        if (unequalKeys.length > 0) {
+          console.log('WARNING: multiple doris records ' + ' (' + dorisRecords[id].length + ')' + ' for ' + id);
+          console.log('unequal keys: ' + JSON.stringify(unequalKeys));
+          for (const dorisRecord of dorisRecords[id]) {
+            for (const key in dorisRecord) {
+              if (dorisRecord.hasOwnProperty(key)) {
+                console.log('====');
+                console.log('---- ' + key + ' ' + dorisRecord[key]);
+              }
+            }
+          }
+        }
+      }
+      return dorisRecords[id][0];
     }
   }
 };

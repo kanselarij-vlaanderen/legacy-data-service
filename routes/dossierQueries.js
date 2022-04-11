@@ -11,6 +11,7 @@ const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/'
 // const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 const MAX_RESULTS = 100000000; // used for debugging pruposes
+const defaultDorisProps = ['dar_document_nr','dar_vorige', 'dar_rel_docs', 'object_name', 'dar_keywords', 'dar_onderwerp', 'dar_aanvullend'];// these are the ones we need for dossier-matching
 
 /* Oplijsten & groeperen van alle procedurestappen met meer dan 1 dossier */
 const getProcedureStappenWithMultipleDossiers = async function (limit) {
@@ -40,7 +41,7 @@ router.get('/procedurestappen-met-meer-dossiers', async function(req, res) {
       if (result.procedurestap) {
         if (!procedurestappen[result.procedurestap]) {
           let dorisId = result.source ? result.source.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '') : undefined;
-          let dorisRecords = dorisMetadata.lookup(dorisId);
+          let dorisRecord = dorisMetadata.lookup(dorisId);
           procedurestappen[result.procedurestap] = {
             procedurestap: result.procedurestap,
             aantalDossiers: result.count,
@@ -48,7 +49,7 @@ router.get('/procedurestappen-met-meer-dossiers', async function(req, res) {
             urls: [],
             titel: result.procedurestapTitle,
             dorisId: dorisId,
-            dorisRecords: dorisRecords
+            dorisRecord: dorisRecord
           };
         }
         const dossierId = result.dossier.substring(result.dossier.lastIndexOf('/') + 1);
@@ -88,8 +89,8 @@ router.get('/potpourri-document-nrs', async function(req, res) {
     for (const result of results) {
       if (result.source) {
         let dorisId = result.source ? result.source.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '') : undefined;
-        let dorisRecords = dorisMetadata.lookup(dorisId);
-        for (const dorisRecord of dorisRecords) {
+        let dorisRecord = dorisMetadata.lookup(dorisId);
+        if (dorisRecord) {
           if (dorisRecord.dar_document_nr) {
             if (!numbers[dorisRecord.dar_document_nr]) {
               numbers[dorisRecord.dar_document_nr] = {
@@ -463,7 +464,7 @@ const getAantalDossiersForProcedurestap = async function (procedurestap) {
 
 const getPotPourriDossiers = async function (limit, includeDorisProps, aantalProcedurestappen, sortOrder, validationMatch, strict, tolerance, thresholds) {
   if (!includeDorisProps) {
-    includeDorisProps = ['dar_document_nr','dar_vorige', 'dar_rel_docs', 'object_name', 'dar_keywords', 'dar_onderwerp', 'dar_aanvullend'];// these are the ones we need for dossier-matching
+    includeDorisProps = defaultDorisProps;
   }
   if (tolerance === undefined || isNaN(tolerance)) {
     tolerance = 0;
@@ -485,39 +486,12 @@ const getPotPourriDossiers = async function (limit, includeDorisProps, aantalPro
         };
       }
       let dorisId = result.source ? result.source.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '') : undefined;
-      let dorisRecords = dorisMetadata.lookup(dorisId);
-      if (dorisRecords.length > 1) {
-        // there are a few dorisIds that return multiple results, but only "dar_update" and "dar_pub_date" seem to differ, which doesn't matter for this analysis
-        let unequalKeys = [];
-        for (let i = 0; i < dorisRecords.length; i++) {
-          // check all keys for equality (it could be just a double)
-          for (var key in dorisRecords[i]) {
-            if (dorisRecords[i].hasOwnProperty(key) && includeDorisProps.indexOf(key) > -1) {
-              for (let j = 0; j < dorisRecords.length; j++) {
-                if (unequalKeys.indexOf(key) === -1 && i !== j && dorisRecords[j][key] !== dorisRecords[i][key]) {
-                  unequalKeys.push(key);
-                }
-              }
-            }
-          }
-        }
-        if (unequalKeys.length === 0) {
-          dorisRecords = [dorisRecords[0]];
-        } else {
-          console.log('WARNING: multiple doris records ' + ' (' + dorisRecords.length + ')' + ' for ' + dorisId);
-          console.log('unequal keys: ' + JSON.stringify(unequalKeys));
-          for (const dorisRecord of dorisRecords) {
-            console.log('====');
-            console.log('---- dar_document_nr ' + dorisRecord.dar_document_nr);
-            console.log('---- object_name ' + dorisRecord.object_name);
-            console.log('---- dar_vorige ' + dorisRecord.dar_vorige);
-            console.log('---- dar_rel_docs ' + dorisRecord.dar_rel_docs);
-          }
-        }
-      }
+      let dorisRecord = dorisMetadata.lookup(dorisId, includeDorisProps);
       let dorisProps = {};
-      for (const dorisProp of includeDorisProps) {
-        dorisProps[dorisProp] = dorisRecords[0][dorisProp];
+      if (dorisRecord) {
+        for (const dorisProp of includeDorisProps) {
+          dorisProps[dorisProp] = dorisRecord[dorisProp];
+        }
       }
       dossiers[result.dossier].procedurestappen.push({
         procedurestap: result.procedurestap,

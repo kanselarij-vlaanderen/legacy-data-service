@@ -12,6 +12,22 @@ const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/'
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 const MAX_RESULTS = 100000000; // used for debugging pruposes
 
+router.get('/doris-record/:dorisId', async function (req, res) {
+  if (req.params && req.params.dorisId) {
+    res.json(dorisMetadata.lookup(req.params.dorisId));
+  }
+});
+router.get('/doris-record-for-resource', async function (req, res) {
+  if (req.params && req.query.resource) {
+    let dorisIds = await kaleidosData.getDorisIds(req.query.resource);
+    let dorisRecords = [];
+    for (const id of dorisIds) {
+      dorisRecords.push(dorisMetadata.lookup(id));
+    }
+    res.json(dorisRecords);
+  }
+});
+
 /* Oplijsten alle mededelingen zonder indienende minister */
 router.get('/mededelingen-zonder-minister', async function(req, res) {
   const name = req.path.replace('/', '');
