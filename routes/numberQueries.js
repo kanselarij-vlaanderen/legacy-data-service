@@ -248,6 +248,9 @@ const getFixableAgendas = async function (agendas) {
           let dorisRecord = dorisMetadata.lookup(mededeling.dorisId, ['dar_doc_type', 'dar_volgnummer']);
           if (dorisRecord) {
             mededeling.dorisDocType = dorisRecord.dar_doc_type;
+            if (!mededeling.dorisDocType) {
+              mededeling.dorisDocType = dorisRecord.dar_fiche_type;
+            }
             mededeling.dorisNumber = dorisRecord.dar_volgnummer;
           }
         }
@@ -290,7 +293,7 @@ const getFixableAgendas = async function (agendas) {
 
 /* Problems with the above we can automatically fix */
 router.get('/fixable-agendas-nummering', async function(req, res) {
-  const name = req.path.replace('/', '');
+  const name = 'agendas-nummering';
   try {
     const query = await queries.getQueryFromFile('/app/queries/agendas_nummering.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
     let jsonResult = await caching.getLocalJSONFile(name);
@@ -318,7 +321,7 @@ router.get('/fixable-agendas-nummering', async function(req, res) {
 
 /* Problems with the above we can automatically fix */
 router.get('/unfixable-agendas-nummering', async function(req, res) {
-  const name = req.path.replace('/', '');
+  const name = 'agendas-nummering';
   try {
     const query = await queries.getQueryFromFile('/app/queries/agendas_nummering.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
     let jsonResult = await caching.getLocalJSONFile(name);
@@ -354,7 +357,7 @@ router.get('/unfixable-agendas-nummering', async function(req, res) {
 
 /* Problems with the above we can automatically fix */
 router.get('/agendas-nummering-sparql-fix', async function(req, res) {
-  const name = req.path.replace('/', '');
+  const name = 'agendas-nummering';
   try {
     const query = await queries.getQueryFromFile('/app/queries/agendas_nummering.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
     let jsonResult = await caching.getLocalJSONFile(name);
@@ -479,8 +482,7 @@ router.get('/agendas-met-DORIS-id-en-foute-nummering', async function(req, res) 
       console.log(`GET /${'agendas-met-DORIS-id'}: ${results.length} results before filtering`);
       await caching.writeLocalFile('agendas-met-DORIS-id', results);
     }
-    let agendas = await getAgendasWithFaultyNumbers(results);
-    let filteredResults = await getFixableAgendas(agendas);
+    let filteredResults = await getAgendasWithFaultyNumbers(results);
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
       csv.sendCSV(filteredResults, req, res, `${name}.csv`, ['agendapunten', 'wrongNumbers', 'mededelingen']);
@@ -492,6 +494,33 @@ router.get('/agendas-met-DORIS-id-en-foute-nummering', async function(req, res) 
     res.status(500).send(e);
   }
 });
+
+const getNotaMededelingen = function (agendas) {
+  let filteredIds = [];
+  let filteredResults = [];
+  for (let agenda of agendas) {
+    for (const mededeling of agenda.mededelingen) {
+      if (mededeling.dorisUrl !== undefined) {
+        mededeling.dorisId = mededeling.dorisUrl.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '');
+      }
+      if (mededeling.dorisId) {
+        let dorisRecord = dorisMetadata.lookup(mededeling.dorisId, ['dar_doc_type', 'dar_fiche_type', 'dar_volgnummer']);
+        if (dorisRecord) {
+          mededeling.dorisDocType = dorisRecord.dar_doc_type;
+          if (!mededeling.dorisDocType) {
+            mededeling.dorisDocType = dorisRecord.dar_fiche_type;
+          }
+          mededeling.dorisNumber = dorisRecord.dar_volgnummer;
+          if (mededeling.dorisDocType && mededeling.dorisDocType.toLowerCase() === 'nota' && filteredIds.indexOf(agenda.agenda) === -1) {
+            filteredIds.push(agenda.agenda);
+            filteredResults.push(agenda);
+          }
+        }
+      }
+    }
+  }
+  return filteredResults;
+};
 
 /* Oplijsten van alle mededelingen die nota's zijn in DORIS */
 router.get('/mededelingen-nota-in-DORIS', async function(req, res) {
@@ -508,29 +537,7 @@ router.get('/mededelingen-nota-in-DORIS', async function(req, res) {
       await caching.writeLocalFile('agendas-met-DORIS-id', results);
     }
     let agendas = await getAgendas(results);
-    let filteredIds = [];
-    let filteredResults = [];
-    for (let agenda of agendas) {
-      for (const mededeling of agenda.mededelingen) {
-        if (mededeling.dorisUrl !== undefined) {
-          mededeling.dorisId = mededeling.dorisUrl.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '');
-        }
-        if (mededeling.dorisId) {
-          let dorisRecord = dorisMetadata.lookup(mededeling.dorisId, ['dar_doc_type', 'dar_fiche_type', 'dar_volgnummer']);
-          if (dorisRecord) {
-            mededeling.dorisDocType = dorisRecord.dar_doc_type;
-            if (!mededeling.dorisDocType) {
-              mededeling.dorisDocType = dorisRecord.dar_fiche_type;
-            }
-            mededeling.dorisNumber = dorisRecord.dar_volgnummer;
-            if (mededeling.dorisDocType && mededeling.dorisDocType.toLowerCase() === 'nota' && filteredIds.indexOf(agenda.agenda) === -1) {
-              filteredIds.push(agenda.agenda);
-              filteredResults.push(agenda);
-            }
-          }
-        }
-      }
-    }
+    let filteredResults = getNotaMededelingen(agendas);
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
       csv.sendCSV(filteredResults, req, res, `${name}.csv`, ['agendapunten', 'wrongNumbers', 'mededelingen']);
@@ -542,5 +549,61 @@ router.get('/mededelingen-nota-in-DORIS', async function(req, res) {
     res.status(500).send(e);
   }
 });
+
+
+/* Komen alle agenda's uit onze eerste poging ook in de nieuwe lijst voor? (antwoord: de fixable agenda's wel) */
+router.get('/final-check-nota-mededelingen', async function(req, res) {
+  const name = req.path.replace('/', '');
+  try {
+    const query = await queries.getQueryFromFile('/app/queries/agendapunten_met_DORIS_id.sparql'); // to inspect query results add: ORDER BY ?geplandeStart ?meeting ?agenda ?agendapuntPrioriteit
+    let jsonResult = await caching.getLocalJSONFile('agendas-met-DORIS-id');
+    let results;
+    if (jsonResult) {
+      results = jsonResult;
+    } else {
+      results = await kaleidosData.executeQuery(query, req.query.limit);
+      console.log(`GET /${'agendas-met-DORIS-id'}: ${results.length} results before filtering`);
+      await caching.writeLocalFile('agendas-met-DORIS-id', results);
+    }
+    let agendas = await getAgendas(results);
+    let filteredResults = getNotaMededelingen(agendas);
+    let filteredIds = filteredResults.map((agenda) => { return agenda.agenda; });
+
+    let faultyAgendas = await getAgendasWithFaultyNumbers(results);
+    console.log(`faultyAgendas: ${faultyAgendas.length} results`);
+    let filteredFaultyAgendas = faultyAgendas.filter((faultyAgenda) => {
+      return filteredIds.indexOf(faultyAgenda.agenda) > -1;
+    });
+    console.log(`filteredFaultyAgendas: ${filteredFaultyAgendas.length} filtered results`);
+
+    let fixableAgendas = await getFixableAgendas(faultyAgendas);
+    console.log(`fixableAgendas: ${fixableAgendas.length} results`);
+    let filteredFixableAgendas = fixableAgendas.filter((faultyAgenda) => {
+      return filteredIds.indexOf(faultyAgenda.agenda) > -1;
+    });
+    console.log(`filteredFixableAgendas: ${filteredFixableAgendas.length} filtered results`);
+    let unfixableAgendas = faultyAgendas.filter((agenda) => {
+      for (const fixableAgenda of fixableAgendas) {
+        if (agenda.agenda === fixableAgenda.agenda) {
+          return false;
+        }
+      }
+      return true;
+    });
+    let filteredUnFixableAgendas = unfixableAgendas.filter((faultyAgenda) => {
+      return filteredIds.indexOf(faultyAgenda.agenda) > -1;
+    });
+    console.log(`filteredUnFixableAgendas: ${filteredUnFixableAgendas.length} filtered results`);
+    if (req.query && req.query.csv) {
+      csv.sendCSV(filteredFixableAgendas, req, res, `${name}.csv`, ['agendapunten', 'wrongNumbers', 'mededelingen']);
+    } else {
+      res.send({ 'fixable agendas in list': filteredFixableAgendas.length, 'unfixable agendas in list': filteredUnFixableAgendas.length, 'faulty agendas in list': filteredFaultyAgendas.length });
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
+
 
 export default router;
