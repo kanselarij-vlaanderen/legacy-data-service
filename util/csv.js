@@ -5,11 +5,15 @@ const CSV_EXPORT_FOLDER = process.env.CSV_EXPORT_FOLDER || '/data/legacy/';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 export default {
-  generateCSV: function (headers, data, excludeFields) {
+  generateCSV: function (headers, data, excludeFields, includeBOM) {
     if (!excludeFields) {
       excludeFields = [];
     }
+    if (includeBOM === undefined) {
+      includeBOM = true;
+    }
     let csvString = ``;
+    const BOM = includeBOM ? '\uFEFF' : ''; // this is necessary to allow applications to recognize the UTF-8 encoding
     // add the headers
     for (const header of headers) {
       if (excludeFields.indexOf(header) === -1) {
@@ -24,7 +28,12 @@ export default {
       for (const header of headers) {
         if (excludeFields.indexOf(header) === -1) {
           if (item.hasOwnProperty(header)) {
-            if (typeof item[header] === 'object') {
+            if (Array.isArray(item[header])) {
+              for (const arrayItem of item[header]) {
+                csvString += `${JSON.stringify(arrayItem).replace(';','|')}|`;
+              }
+              csvString = csvString.substring(0, csvString.length - 1) + ';';
+            } else if (typeof item[header] === 'object') {
               csvString += `"${JSON.stringify(item[header]).replace(';','|')}";`;
             } else if (item[header] !== undefined && ('' + item[header]).indexOf('http') === 0) {
               csvString += `${item[header].replace(';','|')};`;

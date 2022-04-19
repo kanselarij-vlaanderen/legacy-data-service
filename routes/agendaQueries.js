@@ -143,6 +143,24 @@ const getAgendas = function (agendapunten) {
       agendaArray.push(agendas[agendaUrl]);
     }
   }
+  // generate urls
+  for (const result of agendaArray) {
+    if (result.meeting && result.agenda) {
+      const meetingId = result.meeting.substring(result.meeting.lastIndexOf('/') + 1);
+      const agendaId = result.agenda.substring(result.agenda.lastIndexOf('/') + 1);
+      result.url = `${BASE_URL}/vergadering/${meetingId}/agenda/${agendaId}/agendapunten`;
+    }
+  }
+  agendaArray.sort((a,b) => {
+    let aDate = new Date(a.geplandeStart);
+    let bDate = new Date(b.geplandeStart);
+    if (aDate > bDate) {
+      return 1;
+    } else if (bDate > aDate) {
+      return -1;
+    }
+    return 0;
+  });
   return agendaArray;
 };
 
@@ -218,6 +236,35 @@ router.get('/agendas-nummering', async function(req, res) {
   }
 });
 
+const isMededelingNota = async function (mededeling, agenda) {
+  if (!mededeling.dorisDocType) {
+    mededeling.dorisDocType = '';
+  }
+  let normalizedDocType = mededeling.dorisDocType.toLowerCase().trim();
+  if (normalizedDocType === 'nota' || normalizedDocType === 'perkament') {
+    // first check if the priority number is already taken (huge indicator of whether or not to consider this a nota)
+    mededeling.notaPrioriteitBezet = false;
+    for (const agendapunt of agenda.agendapunten) {
+      if (agendapunt.prioriteit === mededeling.prioriteit) {
+        mededeling.notaPrioriteitBezet = true;
+      }
+    }
+    mededeling.stukken = await kaleidosData.getStukkenVoorAgendapunt(mededeling.agendapunt);
+    if (mededeling.notaPrioriteitBezet) {
+      return false;
+    }
+    if (mededeling.stukken && mededeling.stukken.length > 0) {
+      for (const stuk of mededeling.stukken) {
+        if (stuk.title && stuk.title.indexOf('MED') > -1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  return false;
+};
+
 const getFixableAgendas = async function (agendas) {
   // now filter out the agenda's with uninterrupted numbers
   let filteredResults = [];
@@ -260,7 +307,8 @@ const getFixableAgendas = async function (agendas) {
         for (let wrongNumber of agenda.wrongNumbers) {
           for (let missingNumber of wrongNumber.missingNumbers) {
             if (missingNumber === +mededeling.prioriteit) {
-              if (mededeling.dorisDocType && mededeling.dorisDocType.toLowerCase() !== 'mededeling') {
+              mededeling.isNota = await isMededelingNota(mededeling, agenda);
+              if (mededeling.isNota) {
                 agenda.possibleFixesDorisDocTypes += mededeling.dorisDocType + ', ';
                 agenda.possibleFixes += `${missingNumber}, `;
                 fixable = true;
@@ -495,7 +543,10 @@ router.get('/agendas-met-DORIS-id-en-foute-nummering', async function(req, res) 
   }
 });
 
-const getNotaMededelingen = function (agendas) {
+// Get all mededelingen in an agenda that we think are actually supposed to be a nota.
+// checkDocumentsAndPriority makes sure that the documents are checked for 'MED' and the priority is not yet taken by another nota in the agenda
+// if both of those things are clear, we can be quite sure this is a nota that was misclassified.
+const getNotaMededelingen = async function (agendas, checkDocumentsAndPriority) {
   let filteredIds = [];
   let filteredResults = [];
   for (let agenda of agendas) {
@@ -511,9 +562,22 @@ const getNotaMededelingen = function (agendas) {
             mededeling.dorisDocType = dorisRecord.dar_fiche_type;
           }
           mededeling.dorisNumber = dorisRecord.dar_volgnummer;
-          if (mededeling.dorisDocType && mededeling.dorisDocType.toLowerCase() === 'nota' && filteredIds.indexOf(agenda.agenda) === -1) {
-            filteredIds.push(agenda.agenda);
-            filteredResults.push(agenda);
+          if (!mededeling.dorisDocType) {
+            mededeling.dorisDocType = '';
+          }
+          let normalizedDocType = mededeling.dorisDocType.toLowerCase().trim(); // this seems like code repetition, but isn't. It behaves differently if checkDocumentsAndPriority is false
+          if (normalizedDocType === 'nota' || normalizedDocType === 'perkament') {
+            mededeling.isNota = await isMededelingNota(mededeling, agenda);
+            if (!checkDocumentsAndPriority || mededeling.isNota) {
+              if (filteredIds.indexOf(agenda.agenda) === -1) {
+                filteredIds.push(agenda.agenda);
+                filteredResults.push(agenda);
+              }
+              if (!agenda.mededelingenMetNotaDoctype) {
+                agenda.mededelingenMetNotaDoctype = [];
+              }
+              agenda.mededelingenMetNotaDoctype.push(+mededeling.prioriteit);
+            }
           }
         }
       }
@@ -537,7 +601,27 @@ router.get('/mededelingen-nota-in-DORIS', async function(req, res) {
       await caching.writeLocalFile('agendas-met-DORIS-id', results);
     }
     let agendas = await getAgendas(results);
-    let filteredResults = getNotaMededelingen(agendas);
+    let filteredResults = [];
+    // checkDocumentsAndPriority makes sure that the documents are checked for 'MED' and the priority is not yet taken by another nota in the agenda
+    // if both of those things are clear, we can be quite sure this is a nota that was misclassified.
+    // The part below is to get only the ones we're not entirely sure about
+    if (req.query.checkDocumentsAndPriority === 'false') {
+      // not the most efficient way to do it, but quick and easy
+      let checkedResults = await getNotaMededelingen(agendas, true);
+      let allResults = await getNotaMededelingen(agendas, false);
+      // filter out the ones that check out
+      let newFilteredResults = allResults.filter((agenda) => {
+        for (const checkedAgenda of checkedResults) {
+          if (agenda.agenda === checkedAgenda.agenda) {
+            return false;
+          }
+        }
+        return true;
+      });
+      filteredResults = newFilteredResults;
+    } else {
+      filteredResults = await getNotaMededelingen(agendas, req.query.checkDocumentsAndPriority === 'true');
+    }
     console.log(`GET /${name}: ${filteredResults.length} filtered results`);
     if (req.query && req.query.csv) {
       csv.sendCSV(filteredResults, req, res, `${name}.csv`, ['agendapunten', 'wrongNumbers', 'mededelingen']);
@@ -551,7 +635,8 @@ router.get('/mededelingen-nota-in-DORIS', async function(req, res) {
 });
 
 
-/* Komen alle agenda's uit onze eerste poging ook in de nieuwe lijst voor? (antwoord: de fixable agenda's wel) */
+/* Komen alle agenda's uit onze eerste poging ook in de nieuwe lijst voor? (antwoord: de meeste fixable agenda's wel)
+Deze route is vooral voor mezelf om af te checken of de data correct is, en mag voor de rest genegeerd worden */
 router.get('/final-check-nota-mededelingen', async function(req, res) {
   const name = req.path.replace('/', '');
   try {
@@ -566,7 +651,7 @@ router.get('/final-check-nota-mededelingen', async function(req, res) {
       await caching.writeLocalFile('agendas-met-DORIS-id', results);
     }
     let agendas = await getAgendas(results);
-    let filteredResults = getNotaMededelingen(agendas);
+    let filteredResults = await getNotaMededelingen(agendas, req.query.checkDocumentsAndPriority === 'true');
     let filteredIds = filteredResults.map((agenda) => { return agenda.agenda; });
 
     let faultyAgendas = await getAgendasWithFaultyNumbers(results);
@@ -597,13 +682,16 @@ router.get('/final-check-nota-mededelingen', async function(req, res) {
     if (req.query && req.query.csv) {
       csv.sendCSV(filteredFixableAgendas, req, res, `${name}.csv`, ['agendapunten', 'wrongNumbers', 'mededelingen']);
     } else {
-      res.send({ 'fixable agendas in list': filteredFixableAgendas.length, 'unfixable agendas in list': filteredUnFixableAgendas.length, 'faulty agendas in list': filteredFaultyAgendas.length });
+      res.send({
+        'fixable agendas in list':
+        filteredFixableAgendas.length,
+        'unfixable agendas in list': filteredUnFixableAgendas.length,
+        'faulty agendas in list': filteredFaultyAgendas.length });
     }
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
   }
 });
-
 
 export default router;

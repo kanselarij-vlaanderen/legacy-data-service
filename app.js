@@ -3,12 +3,12 @@ import { app, errorHandler } from 'mu';
 import legacyQueries from './routes/legacyQueries';
 import dorisQueries from './routes/dorisQueries';
 import informationalQueries from './routes/informationalQueries';
-import numberQueries from './routes/numberQueries';
+import agendaQueries from './routes/agendaQueries';
 import dossierQueries from './routes/dossierQueries';
 
 app.use(legacyQueries);
 app.use(dorisQueries);
-app.use(numberQueries);
+app.use(agendaQueries);
 app.use(informationalQueries);
 app.use(dossierQueries);
 

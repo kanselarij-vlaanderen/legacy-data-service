@@ -69,6 +69,18 @@ export default {
     return results;
   },
 
+  getStukkenVoorAgendapunt: async function (agendapuntUrl) {
+    const getQuery = `PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+  PREFIX dct: <http://purl.org/dc/terms/>
+
+  select DISTINCT  ?stuk ?title WHERE {
+  <${agendapuntUrl}> besluitvorming:geagendeerdStuk ?stuk .
+  ?stuk dct:title ?title .
+  }`
+    let results = await this.executeQuery(getQuery);
+    return results;
+  },
+
   getDorisIds: async function (resourceUrl) {
     const getQuery = `PREFIX dct: <http://purl.org/dc/terms/>
 
