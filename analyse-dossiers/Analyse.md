@@ -1,6 +1,6 @@
 # Analyse incorrect samengenomen legacy dossiers
 
-Deze analyse betreft de zogenaamde "potpourri" dossiers (zo genoemd omdat er "wat van alles" in zit). Dit zijn dossiers samengesteld uit geïmporteerde procedurestappen uit DORIS waarbij één of meer verkeerde links zijn gelegd, met als gevolg een groot dossier met ongerelateerde procedurestappen.
+Deze analyse betreft de zogenaamde "mix" dossiers (zo genoemd omdat er "wat van alles" in zit). Dit zijn dossiers samengesteld uit geïmporteerde procedurestappen uit DORIS waarbij één of meer verkeerde links zijn gelegd, met als gevolg een groot dossier met ongerelateerde procedurestappen.
 
 Het doel van de code in `/routes/dossierQueries.js` is om 1) alle mogelijke dossiers die aan deze beschrijving voldoen in kaart te brengen, en 2) deze te valideren, d.w.z.: te analyseren welke hiervan correct zijn, en welke incorrect.
 
@@ -43,13 +43,13 @@ Doordat deze fout er toe kan leiden dat verschillende "kettingen" onbedoeld met 
 
 ## 1. Oplijsten alle procedurestappen met meer dan 1 dossier
 
-De query `queries\alle_mogelijke_potpourri_dossiers.sparql`, geeft alle dossiers weer waarvan minstens 1 procedurestap ook in een ander dossier zit. Dit geeft echter zeer veel resultaten (16227), waarbij er sommige dossiers honderden procedurestappen hebben, en sommige maar 1.
+De query `queries\alle_mogelijke_mix_dossiers.sparql`, geeft alle dossiers weer waarvan minstens 1 procedurestap ook in een ander dossier zit. Dit geeft echter zeer veel resultaten (16227), waarbij er sommige dossiers honderden procedurestappen hebben, en sommige maar 1.
 
-`queries\potpourri_stats.sparql` geeft wat meer inzicht. In het resultaat van deze query zien we bijvoorbeeld dat er 1 procedurestap is die in maar liefst 20 dossiers zit, 12 procedurestappen die in 19 dossiers zitten, 12 in 18 dossiers, ..., en tenslotte 8488 procedurestappen die slechts in 2 dossiers zitten.
+`queries\mix_stats.sparql` geeft wat meer inzicht. In het resultaat van deze query zien we bijvoorbeeld dat er 1 procedurestap is die in maar liefst 20 dossiers zit, 12 procedurestappen die in 19 dossiers zitten, 12 in 18 dossiers, ..., en tenslotte 8488 procedurestappen die slechts in 2 dossiers zitten.
 
 Ook zijn er 6217 dossiers in deze lijst die maar 1 procedurestap hebben, die weliswaar ook in nog een ander dossier zit (zie verder hieronder).
 
-We kunnen dus beter onderscheid maken tussen twee soorten "potpourri dossiers".
+We kunnen dus beter onderscheid maken tussen twee soorten "mix dossiers".
 
 a. Dossiers met 2 of meer procedurestappen, die weinig met elkaar te maken hebben.
 
@@ -86,7 +86,7 @@ Als ik in de query enkel de procedurestappen beschouw die een `dct:created` datu
 We moeten per dossier de DORIS brondata voor alle procedurestappen in dat dossier bekijken, ook diegene die enkel in dit dossier zitten (het kan immers dat deze ook niet relevant zijn aan de rest).
 Dan moeten we dit dossier opsplitsen in dossiers met procedurestappen die een duidelijke link hebben in DORIS.
 
-Dit doen we met `queries\procedurestappen_in_potpourri_dossiers.sparql`, die 18172 unieke procedurestappen teruggeeft.
+Dit doen we met `queries\procedurestappen_in_mix_dossiers.sparql`, die 18172 unieke procedurestappen teruggeeft.
 
 Vervolgens hebben we een algoritme geschreven, dat per dossier alle procedurestappen overloopt, en probeert een geldige 'ketting' te maken op basis van `object_name`, `dar_vorige`, `dar_aanvullend` en  `dar_rel_docs` uit de DORIS brondata. De eerste procedurestap waarvoor dit lukt, beschouwen we als de 'main' procedurestap, i.e., de procedurestap die er voor gezorgd heeft dat het dossier kan worden gevormd. Bijvoorbeeld dossier http://themis.vlaanderen.be/id/dossier/8178aa38-dec2-11e9-aa72-0242c0a80002 heeft 2 procedurestappen die wel degelijk bij elkaar horen, maar geen link hebben via `object_name` of `dar_vorige`. In dit specifiek geval lijkt er gelinkt geweest te zijn via `dar_rel_docs` in plaats van `dar_vorige`.
 
@@ -114,17 +114,23 @@ Optimalisatie: als er geen "harde" ketting wordt gevonden via `object_name`, `da
 
 We gebruiken een heuristiek om alsnog een match te herkennen: als een deel van de titel, onderwerp of keywords overeenkomen met een andere stap binnen hetzelfde dossier, kunnen we deze als match beschouwen. Hiervoor gebruiken we dezelfde similariteitsmetriek als bij het matchen van de legacy ministerdata (string distance). Hiervoor kan je volgende parameters instellen als limieten voor de similariteit (een getal van 0 tot 1, met 0 helemaal niet gelijkaardig, en 1 dezelfde genormaliseerde tekst): `titleThreshold`, `subjectThreshold`, `keywordsThreshold`. Als je niks ingeeft, zijn de standaard parameters: `titleThreshold=0.1`, `subjectThreshold=0.1`, `keywordsThreshold=0.7`.
 
-http://localhost:8889/mogelijke-potpourri-dossiers geeft de volledige lijst van alle mogelijke potpourri dossiers - valid EN invalid - met al hun procedurestappen en bijhorende DORIS records gevonden op basis van `dct:source`. Deze query kan lang duren vooraleer deze is uitgevoerd.
+http://localhost:8889/mogelijke-mix-dossiers geeft de volledige lijst van alle mogelijke mix dossiers - valid EN invalid - met al hun procedurestappen en bijhorende DORIS records gevonden op basis van `dct:source`. Deze query kan lang duren vooraleer deze is uitgevoerd, aangezien deze alle standaard instellingen heeft, en veel resultaten toont.
 
-http://localhost:8889/mogelijke-potpourri-dossiers?validationMatch=valid geeft alle gevalideerde dossiers weer, terwijl http://localhost:8889/mogelijke-potpourri-dossiers?validationMatch=invalid alle als foutief gedetecteerde dossiers weergeeft. Bovendien kan je filteren per aantal procedurestappen per dossier, bijvoorbeeld: http://localhost:8889/mogelijke-potpourri-dossiers?validationMatch=invalid&aantalProcedurestappen=5 geeft alle niet-gevalideerde dossiers met 5 procedurestappen weer.
+http://localhost:8889/mogelijke-mix-dossiers?validationMatch=valid geeft alle gevalideerde dossiers weer, terwijl http://localhost:8889/mogelijke-mix-dossiers?validationMatch=invalid alle als foutief gedetecteerde dossiers weergeeft. Bovendien kan je filteren per aantal procedurestappen per dossier, bijvoorbeeld: http://localhost:8889/mogelijke-mix-dossiers?validationMatch=invalid&aantalProcedurestappen=5 geeft alle niet-gevalideerde dossiers met 5 procedurestappen weer.
 
-Voorlopig heeft dit met de standaard parameters als resultaat dat er 104 dossiers zijn die alvast als mogelijks incorrect worden gedetecteerd. Hier zitten echter onvermijdelijk nog vals positieven zowel als vals negatieven bij. Er zijn immers dossiers waarbij door een fout ingevoerde `object_name` in DORIS wel een juiste ketting kon gemaakt worden, maar die eigenlijk niet bij elkaar horen. Er zijn ook nog dossiers waarbij geen exacte ketting kon gevonden worden via `object_name`, `dar_rel_docs`, `dar_aanvullend` en/of `dar_vorige`, maar die wel duidelijk bij elkaar horen, ook al zijn de titels, onderwerpen en/of keywords niet gelijkaardig genoeg voor onze metriek.
+Hoe meer procedurestappen in een dossier, hoe kleiner de kans op een vals negatief resultaat. Het aantal dossiers met deze parameters is nog overzichtelijk genoeg om manueel te verifiëren dat het om slecht samengenomen dossiers gaat, zeker in het geval van de grotere dossiers. Eens de similariteit parameters verstrengd worden (en er met andere woorden moeilijker een match gemaakt wordt op basis van titel, onderwerp en/of keywords), zien we dat het aantal kleinere dossiers drastisch verhoogt. Als we bijvoorbeeld de `titleThreshold` en `subjectThreshold` verhogen van `0.1` naar `0.2`, worden er al in totaal 527 dossiers herkend als mogelijks incorrect. Er is dus een tradeoff tussen het herkennen van meer potentiële problemen, en het beheersbaar houden van het aantal manueel te verifiëren dossiers, met meer vals negatieven hoe hoger de thresholds worden.
 
-Meer specifiek krijgen we deze statistieken voor de huidige als incorrect gedetecteerde dossiers, met de parameters
+Omdat het belangrijker is de grote mixdossiers er uit te halen, en het overzicht verloren wordt als er veel kleine dossiers in de lijst zitten, kan ook gewerkt worden met een zg. "progressieve" threshold, door `progressiveThresholds=true` mee te geven met de url. Dit zorgt er voor dat per 10 procedurestappen in een dossier, er 0.05 aan de aanvankelijke thresholds wordt toegevoegd, tot 1 is bereikt. Als gevolg hiervan zijn we dus "strenger" voor grotere dossiers, en "lakser" voor kleine dossiers in de matching.
+
+Dit laatste kan uitgeprobeerd worden met de url http://localhost:8889/mogelijke-mix-dossiers?validationMatch=Invalid&titleThreshold=0.1&subjectThreshold=0.1&keywordsThreshold=0.7&progressiveThresholds=true
+
+Voorlopig heeft dit met de standaard parameters als resultaat dat er 214 dossiers zijn die alvast als mogelijks incorrect worden gedetecteerd. Hier zitten echter onvermijdelijk nog vals positieven zowel als vals negatieven bij. Er zijn immers dossiers waarbij door een fout ingevoerde `object_name` in DORIS wel een juiste ketting kon gemaakt worden, maar die eigenlijk niet bij elkaar horen. Er zijn ook nog dossiers waarbij geen exacte ketting kon gevonden worden via `object_name`, `dar_rel_docs`, `dar_aanvullend` en/of `dar_vorige`, maar die wel duidelijk bij elkaar horen, ook al zijn de titels, onderwerpen en/of keywords niet gelijkaardig genoeg voor onze metriek.
+
+Meer specifiek krijgen we deze statistieken voor de huidige als incorrect gedetecteerde dossiers, met de parameters `titleThreshold=0.1&subjectThreshold=0.1&keywordsThreshold=0.7&progressiveThresholds=true`:
 
 ```
 "stats": {
-  "Totaal aantal dossiers": 104,
+  "Totaal aantal dossiers": 214,
   "thresholds": {
     "title": 0.1,
     "subject": 0.1,
@@ -132,30 +138,41 @@ Meer specifiek krijgen we deze statistieken voor de huidige als incorrect gedete
   },
   "Aantal dossiers met 122 procedurestappen": 1,
   "Aantal dossiers met 86 procedurestappen": 1,
+  "Aantal dossiers met 61 procedurestappen": 2,
   "Aantal dossiers met 57 procedurestappen": 1,
-  "Aantal dossiers met 53 procedurestappen": 1,
+  "Aantal dossiers met 56 procedurestappen": 1,
+  "Aantal dossiers met 55 procedurestappen": 1,
+  "Aantal dossiers met 54 procedurestappen": 1,
+  "Aantal dossiers met 53 procedurestappen": 3,
   "Aantal dossiers met 50 procedurestappen": 1,
+  "Aantal dossiers met 46 procedurestappen": 1,
+  "Aantal dossiers met 39 procedurestappen": 1,
+  "Aantal dossiers met 36 procedurestappen": 2,
   "Aantal dossiers met 35 procedurestappen": 1,
-  "Aantal dossiers met 33 procedurestappen": 1,
-  "Aantal dossiers met 32 procedurestappen": 1,
-  "Aantal dossiers met 30 procedurestappen": 1,
-  "Aantal dossiers met 29 procedurestappen": 1,
-  "Aantal dossiers met 25 procedurestappen": 1,
-  "Aantal dossiers met 24 procedurestappen": 1,
-  "Aantal dossiers met 23 procedurestappen": 1,
-  "Aantal dossiers met 22 procedurestappen": 1,
-  "Aantal dossiers met 21 procedurestappen": 1,
-  "Aantal dossiers met 20 procedurestappen": 1,
-  "Aantal dossiers met 19 procedurestappen": 2,
-  "Aantal dossiers met 18 procedurestappen": 4,
-  "Aantal dossiers met 17 procedurestappen": 4,
-  "Aantal dossiers met 16 procedurestappen": 2,
-  "Aantal dossiers met 15 procedurestappen": 2,
-  "Aantal dossiers met 14 procedurestappen": 4,
-  "Aantal dossiers met 13 procedurestappen": 5,
-  "Aantal dossiers met 12 procedurestappen": 4,
-  "Aantal dossiers met 11 procedurestappen": 2,
-  "Aantal dossiers met 10 procedurestappen": 7,
+  "Aantal dossiers met 34 procedurestappen": 2,
+  "Aantal dossiers met 33 procedurestappen": 2,
+  "Aantal dossiers met 32 procedurestappen": 3,
+  "Aantal dossiers met 31 procedurestappen": 3,
+  "Aantal dossiers met 30 procedurestappen": 3,
+  "Aantal dossiers met 29 procedurestappen": 6,
+  "Aantal dossiers met 28 procedurestappen": 1,
+  "Aantal dossiers met 26 procedurestappen": 1,
+  "Aantal dossiers met 25 procedurestappen": 2,
+  "Aantal dossiers met 24 procedurestappen": 4,
+  "Aantal dossiers met 23 procedurestappen": 5,
+  "Aantal dossiers met 22 procedurestappen": 5,
+  "Aantal dossiers met 21 procedurestappen": 4,
+  "Aantal dossiers met 20 procedurestappen": 3,
+  "Aantal dossiers met 19 procedurestappen": 4,
+  "Aantal dossiers met 18 procedurestappen": 8,
+  "Aantal dossiers met 17 procedurestappen": 8,
+  "Aantal dossiers met 16 procedurestappen": 4,
+  "Aantal dossiers met 15 procedurestappen": 7,
+  "Aantal dossiers met 14 procedurestappen": 10,
+  "Aantal dossiers met 13 procedurestappen": 13,
+  "Aantal dossiers met 12 procedurestappen": 15,
+  "Aantal dossiers met 11 procedurestappen": 15,
+  "Aantal dossiers met 10 procedurestappen": 17,
   "Aantal dossiers met 9 procedurestappen": 6,
   "Aantal dossiers met 8 procedurestappen": 10,
   "Aantal dossiers met 7 procedurestappen": 4,
@@ -164,11 +181,11 @@ Meer specifiek krijgen we deze statistieken voor de huidige als incorrect gedete
   "Aantal dossiers met 4 procedurestappen": 7,
   "Aantal dossiers met 3 procedurestappen": 5,
   "Aantal dossiers met 2 procedurestappen": 8,
-  "totaalAantalProcedurestappen": 1451
+  "totaalAantalProcedurestappen": 3746
 }
 ```
 
-Hoe meer procedurestappen in een dossier, hoe kleiner de kans op een vals negatief resultaat. Het aantal dossiers met deze parameters is nog overzichtelijk genoeg om manueel te verifiëren dat het om slecht samengenomen dossiers gaat, zeker in het geval van de grotere dossiers. Eens de similariteit parameters verstrengd worden (en er met andere woorden moeilijker een match gemaakt wordt op basis van titel, onderwerp en/of keywords), zien we dat het aantal kleinere dossiers drastisch verhoogt. Als we bijvoorbeeld de `titleThreshold` en `subjectThreshold` verhogen van `0.1` naar `0.2`, worden er al in totaal 527 dossiers herkend als mogelijks incorrect. Er is dus een tradeoff tussen het herkennen van meer potentiële problemen, en het beheersbaar houden van het aantal manueel te verifiëren dossiers, met meer vals negatieven hoe hoger de thresholds worden.
+Vergelijk deze met de statistieken met maximale thresholds (dus eigenlijk met enkel matching als titel, onderwerp of keywords identiek zijn) in `stats-max-thresholds.json`, en je ziet meteen het effect van de progressieve thresholds, aangezien er daar honderden meer kleine dossiers zijn, maar wel dezelfde grote dossiers.
 
 Voor de herkende dossiers bestaat een mogelijke oplossing er uit om op basis van de DORIS nummers de grote dossiers op te splitsen, of deze dossiers (niet de procedurestappen) te verwijderen, uiteraard na manuele verificatie dat het om een slecht dossier gaat.
 

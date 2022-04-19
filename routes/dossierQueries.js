@@ -8,8 +8,8 @@ import { getSimilarity, normalizeString } from '../util/similarity';
 import csv from '../util/csv';
 const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/';
 
-// const BASE_URL = 'https://kaleidos-test.vlaanderen.be';
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
+const BASE_URL = 'https://kaleidos.vlaanderen.be';
+// const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 const MAX_RESULTS = 100000000; // used for debugging pruposes
 const defaultDorisProps = ['dar_document_nr','dar_vorige', 'dar_rel_docs', 'object_name', 'dar_keywords', 'dar_onderwerp', 'dar_aanvullend'];// these are the ones we need for dossier-matching
 
@@ -80,8 +80,8 @@ router.get('/procedurestappen-met-meer-dossiers', async function(req, res) {
   }
 });
 
-/* Oplijsten alle dar_document_nr of potpourri dossiers */
-router.get('/potpourri-document-nrs', async function(req, res) {
+/* Oplijsten alle dar_document_nr of mix dossiers */
+router.get('/mix-document-nrs', async function(req, res) {
   try {
     let results = await getProcedureStappenWithMultipleDossiers(req.query.limit);
     // group the results by dar_document_nr
@@ -128,10 +128,10 @@ router.get('/potpourri-document-nrs', async function(req, res) {
   }
 });
 
-/* Oplijsten & groeperen van alle procedurestappen in een mogelijk potpourri dossier */
-const getProcedureStappenInPotpourriDossiers = async function (limit) {
-  const name = 'procedurestappen-in-potpourri-dossiers';
-  const query = await queries.getQueryFromFile('/app/queries/procedurestappen_in_potpourri_dossiers.sparql');
+/* Oplijsten & groeperen van alle procedurestappen in een mogelijk mix dossier */
+const getProcedureStappenInMixDossiers = async function (limit) {
+  const name = 'procedurestappen-in-mix-dossiers';
+  const query = await queries.getQueryFromFile('/app/queries/procedurestappen_in_mix_dossiers.sparql');
   let results = await caching.getLocalJSONFile(name);
   if (!results) {
     results = await kaleidosData.executeQuery(query, limit);
@@ -143,7 +143,7 @@ const getProcedureStappenInPotpourriDossiers = async function (limit) {
     }
     await caching.writeLocalFile(name, results);
   }
-  console.log('procedurestappen_in_potpourri_dossiers: ' + results.length + ' results.');
+  console.log('procedurestappen_in_mix_dossiers: ' + results.length + ' results.');
   return results;
 };
 
@@ -462,14 +462,22 @@ const getAantalDossiersForProcedurestap = async function (procedurestap) {
   return 0;
 };
 
-const getPotPourriDossiers = async function (limit, includeDorisProps, aantalProcedurestappen, sortOrder, validationMatch, strict, tolerance, thresholds) {
+const getMixDossiers = async function (limit, includeDorisProps, aantalProcedurestappen, sortOrder, validationMatch, strict, tolerance, thresholds, progressiveThresholds, progressiveThresholdStep, progressiveThresholdProcedurestappenStep) {
   if (!includeDorisProps) {
     includeDorisProps = defaultDorisProps;
   }
   if (tolerance === undefined || isNaN(tolerance)) {
     tolerance = 0;
   }
-  let results = await getProcedureStappenInPotpourriDossiers(limit);
+  if (progressiveThresholds) {
+    if (!progressiveThresholdStep || isNaN(progressiveThresholdStep)) {
+      progressiveThresholdStep = 0.05;
+    }
+    if (!progressiveThresholdProcedurestappenStep || isNaN(progressiveThresholdProcedurestappenStep)) {
+      progressiveThresholdProcedurestappenStep = 10;
+    }
+  }
+  let results = await getProcedureStappenInMixDossiers(limit);
   // group the results by dossier
   let dossiers = {};
   for (const result of results) {
@@ -526,8 +534,21 @@ const getPotPourriDossiers = async function (limit, includeDorisProps, aantalPro
     }
   });
   for (let i = 0; i < resultArray.length; i++) {
+    let dossierThresholds = { ...thresholds };
+    if (progressiveThresholds) {
+      for (const key in dossierThresholds) {
+        if (dossierThresholds.hasOwnProperty(key)) {
+          let multiplier = Math.floor(resultArray[i].aantalProcedurestappen / progressiveThresholdProcedurestappenStep);
+          dossierThresholds[key] += progressiveThresholdStep * multiplier;
+          if (dossierThresholds[key] > 1) {
+            dossierThresholds[key] = 1;
+          }
+        }
+      }
+    }
     resultArray[i] = {
-      valid: validateDossierByChains(resultArray[i], strict, tolerance, thresholds),
+      valid: validateDossierByChains(resultArray[i], strict, tolerance, dossierThresholds),
+      thresholds: dossierThresholds,
       ...resultArray[i]
     }
   }
@@ -572,18 +593,58 @@ const getPotPourriDossiers = async function (limit, includeDorisProps, aantalPro
   };
 };
 
-router.get('/mogelijke-potpourri-dossiers', async function(req, res) {
+router.get('/mogelijke-mix-dossiers', async function(req, res) {
   try {
     let thresholds = {
       title: req.query.titleThreshold !== undefined ? +req.query.titleThreshold : 0.1,
       subject: req.query.subjectThreshold !== undefined ? +req.query.subjectThreshold : 0.1,
       keywords: req.query.keywordsThreshold !== undefined ? +req.query.keywordsThreshold : 0.7,
     };
-    let result = await getPotPourriDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch, req.query.strict === 'true', +req.query.tolerance, thresholds);
+    let result = await getMixDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch, req.query.strict === 'true', +req.query.tolerance, thresholds, req.query.progressiveThresholds === 'true', +req.query.progressiveThresholdStep, +req.query.progressiveThresholdProcedurestappenStep);
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${result.dossiers.length} results`);
     if (req.query && req.query.csv) {
-      csv.sendCSV(result.dossiers, req, res, `${name}.csv`, ['procedurestappen']);
+      csv.sendCSV(result.dossiers, req, res, `${name}.csv`, ['valid', 'thresholds', 'identifier', 'procedurestappen', 'startProcedurestap', 'maxChain', 'remainingProcedurestappen', 'relevantProcedurestappen']);
+    } else {
+      res.send(result);
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
+
+// this route is primarily to use to generate a CSV for inspection
+router.get('/mogelijke-mix-dossiers-procedurestappen', async function(req, res) {
+  try {
+    let thresholds = {
+      title: req.query.titleThreshold !== undefined ? +req.query.titleThreshold : 0.1,
+      subject: req.query.subjectThreshold !== undefined ? +req.query.subjectThreshold : 0.1,
+      keywords: req.query.keywordsThreshold !== undefined ? +req.query.keywordsThreshold : 0.7,
+    };
+    let result = await getMixDossiers(req.query.limit, req.query.dorisProps, req.query.aantalProcedurestappen, req.query.sortOrder, req.query.validationMatch, req.query.strict === 'true', +req.query.tolerance, thresholds, req.query.progressiveThresholds === 'true', +req.query.progressiveThresholdStep, +req.query.progressiveThresholdProcedurestappenStep);
+    const name = req.path.replace('/', '');
+    console.log(`GET /${name}: ${result.dossiers.length} results`);
+    if (req.query && req.query.csv) {
+      let csvResults = [];
+      for (const dossier of result.dossiers) {
+        csvResults.push({
+          'Dossier titel': dossier.titel,
+          'Dossier url': dossier.url,
+          'Aantal procedurestappen in dossier': dossier.aantalProcedurestappen,
+          'Minimum aantal dossiers per procedurestap': dossier.minAantalDossiersPerProcedurestap
+        });
+        for (const procedurestap of dossier.procedurestappen) {
+          csvResults.push({
+            'Procedurestap titel': procedurestap.titel,
+            'Procedurestap url': procedurestap.url,
+            'Aantal dossiers waar deze procedurestap in voorkomt': procedurestap.aantalDossiers,
+            'DORIS onderwerp': procedurestap.dar_onderwerp,
+            'DORIS kernwoorden': procedurestap.dar_keywords
+          });
+        }
+      }
+      csv.sendCSV(csvResults, req, res, `${name}.csv`, []);
     } else {
       res.send(result);
     }
