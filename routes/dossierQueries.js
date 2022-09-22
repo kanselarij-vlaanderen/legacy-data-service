@@ -428,12 +428,6 @@ const validateDossierByChains = function (dossier, strict, tolerance, thresholds
       return 'Valid (with relevant procedurestappen in incomplete chain)';
     }
 
-    // some mapping to avoid circular JSON structure
-    dossier.maxChain = dossier.maxChain.map((procedurestap) => { return procedurestap.procedurestap; });
-    for (let procedurestap of dossier.procedurestappen) {
-      procedurestap.chain = procedurestap.chain.map((chainProcedurestap) => { return chainProcedurestap.procedurestap; });
-    }
-
     if (!strict) {
       if (dossier.maxChain.length >= dossier.procedurestappen.length - tolerance) {
         return 'Valid (disregarding ' + tolerance + ' step' + (tolerance > 1 ? 's' : '') + ')';
@@ -546,8 +540,20 @@ const getMixDossiers = async function (limit, includeDorisProps, aantalProcedure
         }
       }
     }
+    let dossierIsValid = validateDossierByChains(resultArray[i], strict, tolerance, dossierThresholds);
+
+    // some mapping to avoid circular JSON structure
+    if (resultArray[i].maxChain) {
+      resultArray[i].maxChain = resultArray[i].maxChain.map((procedurestap) => { return procedurestap.procedurestap; });
+    }
+    for (let procedurestap of resultArray[i].procedurestappen) {
+      if (procedurestap.chain) {
+        procedurestap.chain = procedurestap.chain.map((chainProcedurestap) => { return chainProcedurestap.procedurestap; });
+      }
+    }
+
     resultArray[i] = {
-      valid: validateDossierByChains(resultArray[i], strict, tolerance, dossierThresholds),
+      valid: dossierIsValid,
       thresholds: dossierThresholds,
       ...resultArray[i]
     }

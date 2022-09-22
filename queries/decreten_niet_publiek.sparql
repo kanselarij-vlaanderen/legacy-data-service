@@ -1,0 +1,34 @@
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+
+SELECT DISTINCT ?agendapunt ?agendaPuntTitel ?meeting ?agenda ?document ?title  WHERE {
+  {
+    GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+      ?agendapunt a besluit:Agendapunt .
+      ?agendapunt dct:title ?agendaPuntTitel .
+      ?agenda dct:hasPart ?agendapunt .
+      ?agenda besluitvorming:isAgendaVoor ?meeting .
+      ?agendapunt besluitvorming:geagendeerdStuk ?document .
+      ?document dct:title ?title .
+    }
+    ?document ext:toegangsniveauVoorDocumentVersie <http://kanselarij.vo.data.gift/id/concept/toegangs-niveaus/abe4c18d-13a9-45f0-8cdd-c493eabbbe29> .
+    FILTER ( regex(?agendaPuntTitel, "bekrachtiging en afkondiging", "i") )
+  } UNION {
+    GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+      ?agendapunt a besluit:Agendapunt .
+      ?agendapunt dct:title ?agendaPuntTitel .
+      ?agenda dct:hasPart ?agendapunt .
+      ?agenda besluitvorming:isAgendaVoor ?meeting .
+      ?agendapunt besluitvorming:geagendeerdStuk ?document .
+      ?document dct:title ?title .
+    }
+    ?document ext:toegangsniveauVoorDocumentVersie <http://kanselarij.vo.data.gift/id/concept/toegangs-niveaus/d335f7e3-aefd-4f93-81a2-1629c2edafa3> .
+    FILTER ( regex(?agendaPuntTitel, "bekrachtiging en afkondiging", "i") )
+  }
+}
