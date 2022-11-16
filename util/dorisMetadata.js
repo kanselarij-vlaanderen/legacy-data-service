@@ -17,6 +17,7 @@ const DORIS_PATHS = [
   DORIS_IMPORT_FOLDER + DORIS_GAP + '/VR/dar_doris_vr_document/metadata.csv',
   DORIS_IMPORT_FOLDER + DORIS_GAP + '/VR/dar_doris_vr_fiche/metadata.csv'
 ];
+const IGNORE_KEYS = ["dar_update","dar_err_date","dar_pub_date"];
 
 const dorisRecords = {};
 
@@ -58,21 +59,21 @@ const dorisMetadata =  {
           for (const key in dorisRecords[id][i]) {
             if (dorisRecords[id][i].hasOwnProperty(key) && (!includeDorisProps || includeDorisProps.indexOf(key) > -1)) {
               for (let j = 0; j < dorisRecords[id].length; j++) {
-                if (unequalKeys.indexOf(key) === -1 && i !== j && dorisRecords[id][j][key] !== dorisRecords[id][i][key]) {
+                if (unequalKeys.indexOf(key) === -1 && i !== j && dorisRecords[id][j][key] !== dorisRecords[id][i][key] && (dorisRecords[id][j][key] !== undefined || dorisRecords[id][i][key] !== undefined)) {
                   unequalKeys.push(key);
                 }
               }
             }
           }
         }
-        if (unequalKeys.length > 0) {
+        if (unequalKeys.filter((key) => { return IGNORE_KEYS.indexOf(key) === -1; }).length > 0) {
           console.log('WARNING: multiple doris records ' + ' (' + dorisRecords[id].length + ')' + ' for ' + id);
           console.log('unequal keys: ' + JSON.stringify(unequalKeys));
           for (const dorisRecord of dorisRecords[id]) {
             for (const key in dorisRecord) {
               if (dorisRecord.hasOwnProperty(key)) {
-                console.log('====');
-                console.log('---- ' + key + ' ' + dorisRecord[key]);
+                // console.log('====');
+                // console.log('---- ' + key + ' ' + dorisRecord[key]);
               }
             }
           }
