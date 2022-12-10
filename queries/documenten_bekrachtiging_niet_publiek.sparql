@@ -16,7 +16,7 @@ SELECT DISTINCT ?agendapunt ?agendaPuntTitel ?meeting ?agenda ?document ?title ?
     ?agendapunt besluitvorming:geagendeerdStuk ?document .
     ?document dct:title ?title .
   }
-  ?document ext:toegangsniveauVoorDocumentVersie ?toegangsniveau .
+  ?document besluitvorming:vertrouwelijkheidsniveau ?toegangsniveau .
   ?toegangsniveau skos:prefLabel ?toegangsniveauLabel .
   FILTER ( regex(?agendaPuntTitel, "bekrachtiging", "i") )
   FILTER ( ?toegangsniveauLabel = "Intern Overheid"@nl || ?toegangsniveauLabel = "Intern Regering"@nl )
