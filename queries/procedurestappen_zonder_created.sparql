@@ -9,7 +9,8 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT COUNT(DISTINCT ?procedurestap) COUNT(DISTINCT ?dossier) WHERE {
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
-    ?dossier dossier:doorloopt ?procedurestap .
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
     FILTER NOT EXISTS { ?procedurestap dct:created ?created }
   }
 }

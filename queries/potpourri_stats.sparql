@@ -11,7 +11,8 @@ SELECT COUNT(DISTINCT ?procedurestap) as ?aantalProcedurestappen ?aantalDossiers
   {
     SELECT COUNT(DISTINCT ?dossier) as ?aantalDossiers ?procedurestap WHERE {
       GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
-        ?dossier dossier:doorloopt ?procedurestap .
+        ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+        ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
       }
     } ORDER BY desc(?aantalDossiers)
   }

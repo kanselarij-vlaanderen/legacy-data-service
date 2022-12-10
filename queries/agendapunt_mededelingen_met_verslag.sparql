@@ -23,7 +23,8 @@ SELECT DISTINCT ?mededeling ?titel ?agenda ?meeting ?verslag ?behandelingVanAgen
   ?behandelingVanAgendapunt besluitvorming:genereertVerslag ?verslag .
   ?behandelingVanAgendapunt besluitvorming:resultaat ?beslissingsResultaatCode .
   ?beslissingsResultaatCode skos:prefLabel ?beslissing .
-  ?dossier dossier:doorloopt ?procedurestap .
+  ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+  ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
   OPTIONAL { ?dossier dct:title ?dossierTitle } .
   ?agenda dct:hasPart ?mededeling .
   ?agenda besluitvorming:isAgendaVoor ?meeting .

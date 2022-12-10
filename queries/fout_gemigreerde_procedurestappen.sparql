@@ -1,0 +1,19 @@
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX pub: <http://mu.semte.ch/vocabularies/ext/publicatie/>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+select DISTINCT ?procedurestap ?dossier ?besluitvormingsaangelegenheid WHERE {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?zitting a besluit:Vergaderactiviteit ;
+      besluitvorming:isAangevraagdVoor ?procedurestap;
+      besluit:geplandeStart ?plannedStart .
+    FILTER ( ?plannedStart < xsd:dateTime("2019-10-02T02:00:00Z"))
+    FILTER NOT EXISTS { ?procedurestap ?x ?y  . }
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
+    OPTIONAL { ?publicatieDossier a pub:Publicatieaangelegenheid; dossier:behandelt ?dossier . }
+  }
+}

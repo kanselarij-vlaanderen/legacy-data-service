@@ -1,0 +1,31 @@
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX step: <http://example.com/step/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+PREFIX adms: <http://www.w3.org/ns/adms#>
+
+SELECT DISTINCT ?publicatieDossierUrl ?statusLabel ?created ?title ?kaleidosUrl where {
+  graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?subcase a dossier:Procedurestap ;
+        dct:type <http://example.com/step/6f7d1086-7c02-4a80-8c60-5690894f70fc> ;
+        dct:title ?title ;
+        mu:uuid ?subcaseId ;
+        ext:bevatReedsBezorgdeDocumentversie ?doc ;
+        dct:created ?created .
+    ?decFlow dossier:doorloopt ?subcase;
+             mu:uuid ?decFlowId .
+    ?dossier dossier:Dossier.isNeerslagVan ?decFlow .
+    ?container dossier:Collectie.bestaatUit ?doc ;
+              dct:type <https://data.vlaanderen.be/id/concept/AardWetgeving/Decreet> .
+    ?pubFlow dossier:behandelt ?dossier;
+            mu:uuid ?pubFlowId;
+            adms:status ?status .
+    FILTER (?status != <http://themis.vlaanderen.be/id/concept/publicatie-status/2f8dc814-bd91-4bcf-a823-baf1cdc42475>)
+    FILTER (?created > xsd:dateTime("2022-01-01T00:00:00+01:00"))
+  }
+  BIND(CONCAT("https://kaleidos.vlaanderen.be/dossiers/",STR(?decFlowId),"/deeldossiers/",STR(?subcaseId),"/overzicht") AS ?kaleidosUrl)
+  BIND(CONCAT("https://kaleidos.vlaanderen.be/publicaties/",STR(?pubFlowId),"/dossier") AS ?publicatieDossierUrl)
+  ?status skos:prefLabel ?statusLabel
+} ORDER BY DESC(?created)

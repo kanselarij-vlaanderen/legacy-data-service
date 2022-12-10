@@ -17,7 +17,8 @@ SELECT DISTINCT ?dossier ?dossierTitle ?dossierIdentifier ?procedurestap ?create
             {
               SELECT COUNT(DISTINCT ?dossier) as ?aantalDossiers ?verdachteProcedurestap WHERE {
                 GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
-                  ?dossier dossier:doorloopt ?verdachteProcedurestap .
+                  ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+                  ?besluitvormingsaangelegenheid dossier:doorloopt ?verdachteProcedurestap .
                   ?verdachteProcedurestap dct:created ?created .
                 }
               } ORDER BY desc(?aantalDossiers)
@@ -25,15 +26,17 @@ SELECT DISTINCT ?dossier ?dossierTitle ?dossierIdentifier ?procedurestap ?create
             FILTER (?aantalDossiers > 1)
           }
         }
-        ?dossier dossier:doorloopt ?verdachteProcedurestap .
-        ?dossier dossier:doorloopt ?procedurestap .
+        ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+        ?besluitvormingsaangelegenheid dossier:doorloopt ?verdachteProcedurestap .
+        ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
         ?procedurestap dct:created ?created .
         OPTIONAL { ?dossier dct:title ?dossierTitle . }
         OPTIONAL { ?dossier adms:identifier ?dossierIdentifier . }
       } ORDER BY DESC(?aantalProcedurestappen)
     }
     FILTER (?aantalProcedurestappen > 1)
-    ?dossier dossier:doorloopt ?procedurestap .
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
     ?procedurestap dct:created ?created .
     ?procedurestap dct:source ?source .
     OPTIONAL { ?procedurestap dct:title ?procedurestapTitle . }

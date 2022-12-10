@@ -6,7 +6,8 @@ SELECT DISTINCT ?dossier ?dossierTitle ?procedurestapTitle ?procedurestapAltTitl
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
     ?dossier a dossier:Dossier .
     ?dossier dct:title ?dossierTitle .
-    ?dossier dossier:doorloopt ?procedurestap .
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
     ?procedurestap dct:title ?procedurestapTitle .
     ?procedurestap dct:alternative ?procedurestapAltTitle .
     FILTER ( ?dossierTitle = ?procedurestapTitle )

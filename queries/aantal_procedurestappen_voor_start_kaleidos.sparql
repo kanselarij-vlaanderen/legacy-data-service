@@ -9,8 +9,12 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 
 SELECT COUNT (DISTINCT ?procedurestap) WHERE {
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
-    ?dossier dossier:doorloopt ?procedurestap .
-    ?procedurestap ext:isAangevraagdVoor ?meeting .
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
+    ?activity besluitvorming:vindtPlaatsTijdens ?procedurestap .
+    ?activity besluitvorming:genereertAgendapunt ?agendapunt .
+    ?agenda dct:hasPart ?agendapunt .
+    ?agenda besluitvorming:isAgendaVoor ?meeting .
     ?meeting besluit:geplandeStart ?plannedStart .
     FILTER ( ?plannedStart < xsd:dateTime("2019-10-02T02:00:00Z"))
   }
