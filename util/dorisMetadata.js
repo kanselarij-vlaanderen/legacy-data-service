@@ -81,6 +81,60 @@ const dorisMetadata =  {
       }
       return dorisRecords[id][0];
     }
+  },
+  /* Used to compare DORIS-specific identifiers such as object_name and dar_vorige/dar_rel_docs.
+  Returns true if id1 contains id2 (case-insensitive) or vice-versa
+  OR if id1 and id2 both contain 'DOC', AND have matching year and identifier */
+  compareIds: function (id1, id2) {
+    const docRegex = /[A-Z][A-Z] ([0-9][0-9][0-9][0-9]).*DOC\.([0-9]?[0-9]?[0-9]?[0-9]?).*/;
+    if (id1.indexOf('DOC') > -1 && id2.indexOf('DOC') > -1) {
+      let doc1Ids = id1.match(docRegex);
+      let doc2Ids = id2.match(docRegex);
+      if (doc1Ids && doc2Ids && doc1Ids.length > 2 && doc1Ids.length === doc2Ids.length) {
+        // the identifier could have an inconsistently used prefix 0 (e.g., 0472 vs 472), so we compare both the string values and numerical values
+        if (doc1Ids[1] === doc2Ids[1] && (doc1Ids[2] === doc2Ids[2] || (!isNaN(doc1Ids[2]) && !isNaN(doc2Ids[2]) && +doc1Ids[2] === +doc2Ids[2]))) {
+          return true;
+        }
+      }
+    }
+    return id1.toUpperCase().indexOf(id2.toUpperCase()) > -1 || id2.toUpperCase().indexOf(id1.toUpperCase()) > -1;
+  },
+
+  /* Returns an array of unique sourceIds that are normalized (BIS/TER and other suffixes removed).
+    For example:
+    sourceIdString "VR 2019 1101 DOC.0130;VR 2019 1705 DOC.0715/1BIS;VR 2019 1705 DOC.0715/2BIS;VR 2019 1705 DOC.0715/3"
+    returns ["VR 2019 1101 DOC.0130","VR 2019 1705 DOC.0715"]
+  */
+  getSourceIds: function (sourceIdString) {
+    let parsedSourceIds = [];
+    if (sourceIdString) {
+      parsedSourceIds = sourceIdString.split(/[;,]/).filter((id) => {
+        return id.indexOf('VR/JJJJ/DD/MM') === -1;
+      }).map((id) => {
+        if (id.indexOf('/') > -1) {
+          return id.substring(0, id.lastIndexOf('/'));
+        }
+        return id;
+      }).map((id) => {
+        if (id.toUpperCase().indexOf('BIS') > -1) {
+          return id.substring(0, id.toUpperCase().lastIndexOf('BIS'));
+        }
+        if (id.toUpperCase().indexOf('TER') > -1) {
+          return id.substring(0, id.toUpperCase().lastIndexOf('TER'));
+        }
+        return id;
+      });
+    }
+    // remove duplicates for efficiency
+    let sourceIds = [];
+    for (const id of parsedSourceIds) {
+      if (sourceIds.indexOf(id) === -1) {
+        sourceIds.push(id);
+      }
+    }
+    return sourceIds.map((id) => {
+      return id.toUpperCase().trim();
+    });
   }
 };
 

@@ -8,7 +8,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 PREFIX pub: <http://mu.semte.ch/vocabularies/ext/publicatie/>
 
-SELECT DISTINCT ?procedurestap ?besluitvormingsaangelegenheid ?dossier ?publicatieDossier ?source ?aanmaakDatum WHERE {
+SELECT COUNT(DISTINCT ?procedurestap) WHERE {
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
     ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
     ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid .
@@ -24,4 +24,4 @@ SELECT DISTINCT ?procedurestap ?besluitvormingsaangelegenheid ?dossier ?publicat
     OPTIONAL { ?publicatieDossier a pub:Publicatieaangelegenheid; dossier:behandelt ?dossier . }
     OPTIONAL {  ?procedurestap dct:source ?source . }
   }
-} ORDER BY ?aanmaakDatum
+}
