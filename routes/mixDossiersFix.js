@@ -551,15 +551,15 @@ const getSubcaseCluster = function (startCase, startIndex, allCases, currentClus
         }
       }
       // kijk dan verder voor deze procedurestappen om de cluster nog te vergroten
-      // for (const relevantCase of relevantCases) {
-      //   const relevantCaseCluster = getSubcaseCluster(relevantCase.case, relevantCase.index, allCases, currentCluster);
-      //   for (const clusterCase of relevantCaseCluster) {
-      //     if (!currentClusterIds[clusterCase.procedurestappen[0].procedurestap]) {
-      //       currentCluster.push(clusterCase);
-      //       currentClusterIds[clusterCase.procedurestappen[0].procedurestap] = true;
-      //     }
-      //   }
-      // }
+      for (const relevantCase of relevantCases) {
+        const relevantCaseCluster = getSubcaseCluster(relevantCase.case, relevantCase.index, allCases, currentCluster);
+        for (const clusterCase of relevantCaseCluster) {
+          if (!currentClusterIds[clusterCase.procedurestappen[0].procedurestap]) {
+            currentCluster.push(clusterCase);
+            currentClusterIds[clusterCase.procedurestappen[0].procedurestap] = true;
+          }
+        }
+      }
     }
   }
   // als er geen procedurestappen of relevantIds meer zijn kunnen we de cluster afsluiten
@@ -601,7 +601,7 @@ const clusterSubcases = async function (limit) {
         }
         let caseToKeep = subcaseCluster[subcaseCluster.length - 1];
         // Eens een cluster is gevormd, worden alle procedurestappen in die cluster samengevoegd onder het dossier van de oudste procedurestap en uit de zoekset genomen.
-        for (let i = subcaseCluster.length - 2; i > 0 ; i--) {
+        for (let i = subcaseCluster.length - 2; i >= 0 ; i--) {
           // we voegen alle procedurestappen bij de oudste besluitvormingsaangelegenheid, behalve de procedurestap die er al in zit
           caseToKeep.procedurestappen.push(subcaseCluster[i].procedurestappen[0]);
           let found = false;
