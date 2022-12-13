@@ -579,7 +579,7 @@ const clusterSubcases = async function (limit) {
   console.log('Started clustering process...');
   // We beginnen met de nieuwste procedurestap, zodat we altijd de langst mogelijke cluster kunnen maken teruggaande in de tijd.
   let maxCountSoFar = 0;
-  while (splitCases.length > 0 && clusteredCases.length < limit) {
+  while (splitCases.length > 0 && (!limit || clusteredCases.length < limit)) {
     if (splitCases.length % 1000 === 0) {
       console.log(clusteredCases.length + ' geclusterde dossiers. Grootste dossier tot nu toe: ' + maxCountSoFar + ' procedurestappen');
       console.log('Nog ' + splitCases.length + ' dossiers te gaan.');
