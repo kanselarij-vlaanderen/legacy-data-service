@@ -96,8 +96,10 @@ const dorisMetadata =  {
           return true;
         }
       }
+      return false;
+    } else {
+      return id1.toUpperCase().indexOf(id2.toUpperCase()) > -1 || id2.toUpperCase().indexOf(id1.toUpperCase()) > -1;
     }
-    return id1.toUpperCase().indexOf(id2.toUpperCase()) > -1 || id2.toUpperCase().indexOf(id1.toUpperCase()) > -1;
   },
 
   /* Returns an array of unique sourceIds that are normalized (BIS/TER and other suffixes removed).

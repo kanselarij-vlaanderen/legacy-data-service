@@ -468,7 +468,7 @@ const splitIntoSingleSubcases = async function (limit) {
       }
     }
   }
-  console.log(Object.keys(subcaseCaseMapping).length + ' dossiers in totaal gehouden.');
+  console.log(Object.keys(subcaseCaseMapping).length + ' dossiers in totaal gehouden na opsplitsen.');
   console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen.');
   console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
@@ -488,10 +488,10 @@ router.get('/mixdossiers-fix-1-dossier-per-procedurestap', async function(req, r
   }
 });
 
-/* Haalt een cluster van procedurestappen op voor startCase, op basis van dar_vorige, dar_rel_docs en dar_aanvullend.
-  startIndex is de positie van startSubcase in allCases. Alle indexes daarna zijn procedurestappen met eerdere of gelijke aanmaakDatum.
+/* Haalt een cluster van procedurestappen op voor startCase, op basis van dar_vorige.
+  startIndex is de positie van startSubcase in casesSearchSet. Alle indexes daarna zijn procedurestappen met eerdere of gelijke aanmaakDatum.
   We gaan er van uit dat startCase 1 enkele procedurestap heeft met dorisRecord. */
-const getSubcaseCluster = function (startCase, startIndex, allCases, currentCluster) {
+const getSubcaseCluster = function (startCase, startIndex, casesSearchSet, currentCluster) {
   if (!currentCluster) {
     currentCluster = [startCase];
   }
@@ -502,8 +502,8 @@ const getSubcaseCluster = function (startCase, startIndex, allCases, currentClus
   }
   // haal de genormaliseerde ids op van de links om te volgen
   let vorigeIds = dorisMetadata.getSourceIds(startCase.procedurestappen[0].dorisRecord.dar_vorige);
-  let relDocIds = dorisMetadata.getSourceIds(startCase.procedurestappen[0].dorisRecord.dar_rel_docs);
-  let aanvullendIds = dorisMetadata.getSourceIds(startCase.procedurestappen[0].dorisRecord.dar_aanvullend);
+  // let relDocIds = dorisMetadata.getSourceIds(startCase.procedurestappen[0].dorisRecord.dar_rel_docs);
+  // let aanvullendIds = dorisMetadata.getSourceIds(startCase.procedurestappen[0].dorisRecord.dar_aanvullend);
   // voeg deze samen tot 1 array van relevante ids
   let relevantIds = [];
   for (const id of vorigeIds) {
@@ -511,32 +511,22 @@ const getSubcaseCluster = function (startCase, startIndex, allCases, currentClus
       relevantIds.push(id);
     }
   }
-  for (const id of relDocIds) {
-    if (id && relevantIds.indexOf(id) === -1) {
-      relevantIds.push(id);
-    }
-  }
-  for (const id of aanvullendIds) {
-    if (id && relevantIds.indexOf(id) === -1) {
-      relevantIds.push(id);
-    }
-  }
-  if (startIndex < allCases.length && relevantIds.length > 0) {
+  if (startIndex < casesSearchSet.length && relevantIds.length > 0) {
     let relevantCases = [];
     let relevantCaseIds = {};
     // check de object_name van alle procedurestappen voor het eerste niveau van relevante procedurestappen
     // beschouw enkel de procedurestappen vanaf de startIndex, zonder degenen die al in de cluster zitten
-    for (let i = startIndex; i < allCases.length; i++) {
-      if (!currentClusterIds[allCases[i].procedurestappen[0].procedurestap] &&
-          !relevantCaseIds[allCases[i].procedurestappen[0].procedurestap] &&
-          allCases[i].procedurestappen[0].dorisRecord && allCases[i].procedurestappen[0].dorisRecord.object_name &&
-          allCases[i].procedurestappen[0].procedurestap !== startCase.procedurestappen[0].procedurestap) {
+    for (let i = startIndex; i < casesSearchSet.length; i++) {
+      if (!currentClusterIds[casesSearchSet[i].procedurestappen[0].procedurestap] &&
+          !relevantCaseIds[casesSearchSet[i].procedurestappen[0].procedurestap] &&
+          casesSearchSet[i].procedurestappen[0].dorisRecord && casesSearchSet[i].procedurestappen[0].dorisRecord.object_name &&
+          casesSearchSet[i].procedurestappen[0].procedurestap !== startCase.procedurestappen[0].procedurestap) {
         for (const id of relevantIds) {
-          if (!relevantCaseIds[allCases[i].procedurestappen[0].procedurestap]) {
+          if (!relevantCaseIds[casesSearchSet[i].procedurestappen[0].procedurestap]) {
             // de relevante id moet matchen met object_name
-            if (allCases[i].procedurestappen[0].dorisRecord.object_name && dorisMetadata.compareIds(allCases[i].procedurestappen[0].dorisRecord.object_name, id)) {
-              relevantCases.push({ case: allCases[i], index: i });
-              relevantCaseIds[allCases[i].procedurestappen[0].procedurestap] = true;
+            if (casesSearchSet[i].procedurestappen[0].dorisRecord.object_name && dorisMetadata.compareIds(casesSearchSet[i].procedurestappen[0].dorisRecord.object_name, id)) {
+              relevantCases.push({ case: casesSearchSet[i], index: i });
+              relevantCaseIds[casesSearchSet[i].procedurestappen[0].procedurestap] = true;
             }
           }
         }
@@ -552,18 +542,21 @@ const getSubcaseCluster = function (startCase, startIndex, allCases, currentClus
       }
       // kijk dan verder voor deze procedurestappen om de cluster nog te vergroten
       for (const relevantCase of relevantCases) {
-        const relevantCaseCluster = getSubcaseCluster(relevantCase.case, relevantCase.index, allCases, currentCluster);
-        for (const clusterCase of relevantCaseCluster) {
-          if (!currentClusterIds[clusterCase.procedurestappen[0].procedurestap]) {
-            currentCluster.push(clusterCase);
-            currentClusterIds[clusterCase.procedurestappen[0].procedurestap] = true;
+        const relevantCaseCluster = getSubcaseCluster(relevantCase.case, relevantCase.index, casesSearchSet, [...currentCluster]);// belangrijk dat currentCluster een kopie is, anders worden procedurestappen dubbel toegevoegd
+        if (relevantCaseCluster.length > 1) {
+          for (const clusterCase of relevantCaseCluster) {
+            let check = currentClusterIds[clusterCase.procedurestappen[0].procedurestap];
+            if (!check) {
+              currentCluster.push(clusterCase);
+              currentClusterIds[clusterCase.procedurestappen[0].procedurestap] = true;
+            }
           }
         }
       }
     }
   }
   // als er geen procedurestappen of relevantIds meer zijn kunnen we de cluster afsluiten
-  return currentCluster;
+  return currentCluster.sort((a, b) => { return new Date(b.procedurestappen[0].aanmaakDatum) - new Date(a.procedurestappen[0].aanmaakDatum); });
 };
 
 /* Neemt de lijst van opgesplitste procedurestappen en groepeert deze door van nieuw naar oud een 'cluster' van procedurestappen te maken via de DORIS properties */
@@ -601,26 +594,21 @@ const clusterSubcases = async function (limit) {
         }
         let caseToKeep = subcaseCluster[subcaseCluster.length - 1];
         // Eens een cluster is gevormd, worden alle procedurestappen in die cluster samengevoegd onder het dossier van de oudste procedurestap en uit de zoekset genomen.
-        for (let i = subcaseCluster.length - 2; i >= 0 ; i--) {
-          // we voegen alle procedurestappen bij de oudste besluitvormingsaangelegenheid, behalve de procedurestap die er al in zit
-          caseToKeep.procedurestappen.push(subcaseCluster[i].procedurestappen[0]);
+        // we voegen alle procedurestappen bij de oudste besluitvormingsaangelegenheid, behalve de procedurestap die er al in zit
+        caseToKeep.procedurestappen = subcaseCluster.map((clusteredCase) => { return clusteredCase.procedurestappen[0]; })
+        for (let i = 0; i < subcaseCluster.length ; i++) {
           let found = false;
           for (let j = 0; !found && j < splitCases.length; j++) {
             if (subcaseCluster[i].originalIndex === splitCases[j].originalIndex) {
               found = true;
-              casesToBeRemoved.push(splitCases[j]);
               splitCases.splice(j, 1);
+              if (caseToKeep.originalIndex !== splitCases[j].originalIndex) {
+                casesToBeRemoved.push(splitCases[j]);
+              }
             }
           }
         }
         clusteredCases.push(caseToKeep);
-        let found = false;
-        for (let j = 0; !found && j < splitCases.length; j++) {
-          if (caseToKeep.originalIndex === splitCases[j].originalIndex) {
-            found = true;
-            splitCases.splice(j, 1);
-          }
-        }
       } else {
         // dit blijft een aparte procedurestap.
         clusteredCases.push(splitCases[0]);
@@ -637,6 +625,7 @@ const clusterSubcases = async function (limit) {
   let keptCaseCount = 0;
   let newCaseCount = 0;
   for (const clusteredCase of clusteredCases) {
+    clusteredCase.aantalProcedurestappen = clusteredCase.procedurestappen.length;
     if (clusteredCase.procedurestappen.length > maxCount) {
       maxCount = clusteredCase.procedurestappen.length;
     }
@@ -654,6 +643,7 @@ const clusterSubcases = async function (limit) {
   console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
   console.log('Minimum ' + minCount + ' procedurestap(pen) per dossier.');
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
+  console.log(casesToBeRemoved.length + ' dossiers zijn ergens anders ondergebracht en zullen worden verwijderd.');
   return { clusteredCases: clusteredCases.sort((a, b) => { return b.procedurestappen.length - a.procedurestappen.length;}).slice(0, limit ? +limit : clusteredCases.length) };
 };
 
