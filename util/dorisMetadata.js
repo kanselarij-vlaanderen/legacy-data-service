@@ -113,7 +113,7 @@ const dorisMetadata =  {
       parsedSourceIds = sourceIdString.split(/[;,]/).filter((id) => {
         return id.indexOf('VR/JJJJ/DD/MM') === -1;
       }).map((id) => {
-        if (id.indexOf('/') > -1) {
+        if (id.indexOf('/') > -1 && id.indexOf('DOC') > -1) {
           return id.substring(0, id.lastIndexOf('/'));
         }
         return id;

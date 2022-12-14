@@ -579,6 +579,7 @@ const clusterSubcases = async function (limit) {
   console.log('Started clustering process...');
   // We beginnen met de nieuwste procedurestap, zodat we altijd de langst mogelijke cluster kunnen maken teruggaande in de tijd.
   let maxCountSoFar = 0;
+  let didntTakeFirstCase = 0;
   while (splitCases.length > 0 && (!limit || clusteredCases.length < limit)) {
     if (splitCases.length % 1000 === 0) {
       console.log(clusteredCases.length + ' geclusterde dossiers. Grootste dossier tot nu toe: ' + maxCountSoFar + ' procedurestappen');
@@ -593,6 +594,15 @@ const clusterSubcases = async function (limit) {
           maxCountSoFar = subcaseCluster.length;
         }
         let caseToKeep = subcaseCluster[subcaseCluster.length - 1];
+        if (!caseToKeep.url) {
+          // neem een bestaand dossier bij voorkeur
+          for (let i = 0; i < subcaseCluster.length; i++) {
+            if (subcaseCluster[i].url) {
+              caseToKeep = subcaseCluster[i];
+              didntTakeFirstCase++;
+            }
+          }
+        }
         // Eens een cluster is gevormd, worden alle procedurestappen in die cluster samengevoegd onder het dossier van de oudste procedurestap en uit de zoekset genomen.
         // we voegen alle procedurestappen bij de oudste besluitvormingsaangelegenheid, behalve de procedurestap die er al in zit
         caseToKeep.procedurestappen = subcaseCluster.map((clusteredCase) => { return clusteredCase.procedurestappen[0]; })
@@ -639,7 +649,7 @@ const clusterSubcases = async function (limit) {
     }
   }
   console.log(clusteredCases.length + ' dossiers overgehouden na clusteren.');
-  console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen.');
+  console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen. (in ' + didntTakeFirstCase + ' gevallen was dit niet de oudste procedurestap)');
   console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
   console.log('Minimum ' + minCount + ' procedurestap(pen) per dossier.');
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
