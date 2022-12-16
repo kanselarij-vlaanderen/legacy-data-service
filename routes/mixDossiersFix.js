@@ -33,6 +33,8 @@ import * as path from 'path';
     caseToRemove: array van dossiers die mogen worden verwijderd (m.a.w. de URI + alle triples er van en naar). Hier zitten ook de decisionFlow en publicatieDossiers bij
     clusteredCases: array van dossiers die mogen blijven. Als deze al een URL hebben moeten enkel de links naar de procedurestappen geINSERT worden. Indien het een nieuw dossier is moet alles aangemaakt worden.
   }
+
+  /mixdossiers-fix-create-migrations genereert de migraties om deze dossiers en procedurestappen in de databank te krijgen, alsook de foute dossiers er uit te verwijderen.
 */
 
 const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/migrations';
