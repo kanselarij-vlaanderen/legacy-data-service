@@ -6,6 +6,8 @@ import queries from '../util/queries';
 import dorisMetadata from '../util/dorisMetadata';
 import csv from '../util/csv';
 import { uuid } from 'mu';
+import { promises as fsp } from 'fs';
+import * as path from 'path';
 
 /*
   Deze library bevat routes en functies om de mixdossiers te fixen volgens KAS-3649 en KAS-3650.
@@ -26,37 +28,14 @@ import { uuid } from 'mu';
   Stap 1 (KAS-3649) is het opsplitsen van alle pre-kaleidos dossiers in dossiers met welgeteld 1 enkele procedurestap, en alle andere dossiers verwijderen.
 
 
-  /mixdossiers-fix geeft een object met volgende properties terug:
+  /mixdossiers-fix-cluster-procedurestappen geeft een object met volgende properties terug:
   {
-    casesToDelete: array van dossiers die mogen worden verwijderd (m.a.w. de URI + alle triples er van en naar),
-    decisionFlowsToDelete: array van besluitvormingsaangelegenheden die mogen worden verwijderd (m.a.w. de URI + alle triples er van en naar),
-    publicationFlowsToDelete: array van publicatiedossiers die mogen worden verwijderd (m.a.w. de URI + alle triples er van en naar),
-    casesToKeep: array van dossiers die mogen blijven (sowieso alle uitzonderingen),
-    decisionFlowsToKeep: array van besluitvormingsaangelegenheden die mogen blijven,
-    publicationFlowsToKeep: array van publicatiedossiers die mogen blijven,
-    toInsert: array van objecten met volgende structuur:
-      {
-        uri: // nieuwe URI voor dit dossier,
-        title:
-        shortTitle:
-        created:
-        number:
-        isArchived:
-        pieces:
-        decisionFlow: {
-          uri: // nieuwe URI voor de besluitvormingsaangelegenheid
-          title:
-          shortTitle:
-          opened:
-          closed:
-          governmentAreas:
-          subcases: [] // array of subcase URIs
-        }
-      }
+    caseToRemove: array van dossiers die mogen worden verwijderd (m.a.w. de URI + alle triples er van en naar). Hier zitten ook de decisionFlow en publicatieDossiers bij
+    clusteredCases: array van dossiers die mogen blijven. Als deze al een URL hebben moeten enkel de links naar de procedurestappen geINSERT worden. Indien het een nieuw dossier is moet alles aangemaakt worden.
   }
 */
 
-const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/';
+const SPARQL_EXPORT_FOLDER = process.env.SPARQL_EXPORT_FOLDER || '/data/legacy/migrations';
 // const BASE_URL = 'https://kaleidos.vlaanderen.be';
 const BASE_URL = 'http://localhost';
 
@@ -118,6 +97,8 @@ const getExceptions = async function (limit) {
     publicatieDossiers: array met publicatiedossiers,
     url: kaleidos url voor de besluitvormingsaangelegenheid
   }
+
+  NOTE: als mixDossiers-migrations/20221215120000-delete-faulty-subcases.sparql eerst wordt uitgevoerd op migrations, geeft deze stap normaal gezien 0 dossiers terug.
 */
 const getFlaggedCases = async function (limit, exceptions) {
   const name = 'fout-gemigreerde-procedurestappen';
@@ -212,6 +193,7 @@ const getDossiers = async function (limit, order) {
           procedurestap: result.procedurestap,
           aanmaakDatum: result.aanmaakDatum,
           dorisId: dorisId,
+          // dorisRecord: dorisRecord
           dorisRecord: dorisRecord === undefined ? undefined : { // selecteer enkel de relevante properties hieruit, om geheugen te sparen en de browser niet te overbelasten bij inspectie
             'object_name': dorisRecord['object_name'],
             'dar_vorige': dorisRecord['dar_vorige'],
@@ -335,7 +317,7 @@ router.get('/mixdossiers-fix-get-alle-dossiers', async function(req, res) {
   Hierbij wordt zo veel mogelijk bestaande data behouden.
   Bij nieuwe dossiers worden nog geen uuids aangemaakt, omdat na deze stap nog een clustering volgt op basis van de DORIS informatie.
 
-  Return object subcaseCaseMapping: object met als key een procedurestap uri, en als value een object dat het volgende bevat:
+  Return object splitCasesMapping: object met als key een procedurestap uri, en als value een object dat het volgende bevat:
     {
       dossier: // dossier uri (indien bestaand)
       besluitvormingsaangelegenheid:  // besluitvormingsaangelegenheid uri (indien bestaand)
@@ -356,8 +338,8 @@ const splitIntoSingleSubcases = async function (limit) {
       }
     }
   }
-  let subcaseCaseMapping = {}; // keep track of which cases/decisionflows were added for each subcase. We'll store the kaleidos url in here for convenience
-  let toRemove = [];
+  let splitCasesMapping = {}; // keep track of which cases/decisionflows were added for each subcase. We'll store the kaleidos url in here for convenience
+  let casesToRemove = [];
   let doubleSubcaseCount = 0;
   let pubCount = 0;
   let noPubCount = 0;
@@ -369,44 +351,44 @@ const splitIntoSingleSubcases = async function (limit) {
   for (let i = 0; i < cases.length; i++) {
     if (cases[i].procedurestappen.length === 1) {
       // check if we already added this subcase
-      if (subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap]) {
+      if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap]) {
         // NOTE: This happened because we already created a new case for this in the next step (split out of a bigger case)
         // We should replace that case with this existing one
-        if (cases[i].url && !subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].url) {
-          subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
-        } else if (cases[i].url && subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].url) {
+        if (cases[i].url && !splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url) {
+          splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
+        } else if (cases[i].url && splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url) {
           // NOTE: dit gebeurt omdat er 2 dossiers zijn waaruit foute procedurestappen zijn gefilterd, en beide nu slechts 1 juiste procedurestap overhouden.
           // Hier kunnen we op basis van de properties van het dossier kiezen dewelke te houden
           const subcaseTitle = await kaleidosData.getTitleForSubject(cases[i].procedurestappen[0].procedurestap);
           const currentTitle = await kaleidosData.getTitleForSubject(cases[i].dossier);
-          const existingTitle = await kaleidosData.getTitleForSubject(subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].dossier);
+          const existingTitle = await kaleidosData.getTitleForSubject(splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier);
           // indien er een publicatie is bij 1 dossier, hou die sowieso
-          if (subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length === 0 && cases[i].publicatieDossiers.length > 0) {
+          if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length === 0 && cases[i].publicatieDossiers.length > 0) {
             // verwijder het bestaande dossier.
-            toRemove.push(cases[i]);
-            toRemove.push(subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap]);
-            subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
+            casesToRemove.push(cases[i]);
+            casesToRemove.push(splitCasesMapping[cases[i].procedurestappen[0].procedurestap]);
+            splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
             chosePublication++;
-          } else if (subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length > 0) {
+          } else if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length > 0) {
             // verwijder het huidige dossier.
-            toRemove.push(cases[i]);
+            casesToRemove.push(cases[i]);
             chosePublication++;
           } else if (subcaseTitle !== existingTitle && subcaseTitle === currentTitle) {
             // als de titel matcht met de procedurestap, hou dan het huidige dossier.
-            toRemove.push(subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap]);
-            subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
+            casesToRemove.push(splitCasesMapping[cases[i].procedurestappen[0].procedurestap]);
+            splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
             choseTitle++;
           } else if (subcaseTitle === existingTitle) {
             // als de titel matcht met de procedurestap, hou dan het huidige dossier.
-            toRemove.push(cases[i]);
+            casesToRemove.push(cases[i]);
             choseTitle++;
           } else {
             // verwijder het huidige dossier.
-            toRemove.push(cases[i]);
+            casesToRemove.push(cases[i]);
             choseExisting++;
           }
           // detecteer de verschillen tussen deze besluitvormingsaangelegenheden
-          // let differentTriples = await kaleidosData.compareResources(cases[i].besluitvormingsaangelegenheid, subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].besluitvormingsaangelegenheid);
+          // let differentTriples = await kaleidosData.compareResources(cases[i].besluitvormingsaangelegenheid, splitCasesMapping[cases[i].procedurestappen[0].procedurestap].besluitvormingsaangelegenheid);
           // console.log('Differing triples:');
           // console.log(differentTriples);
           // Wat statistieken voor debugging
@@ -425,26 +407,26 @@ const splitIntoSingleSubcases = async function (limit) {
             ' (' + cases[i].publicatieDossiers.length + ' publications)' +
             ' case: ' + cases[i].dossier + ' : ' + currentTitle
           );
-          console.log(subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].url +
-            ' (' + subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].procedurestappen.length + ' procedurestappen)' +
-            ' (' + subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length + ' publications)' +
-            ' case: ' + subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap].dossier + ' : ' + existingTitle
+          console.log(splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url +
+            ' (' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].procedurestappen.length + ' procedurestappen)' +
+            ' (' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length + ' publications)' +
+            ' case: ' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier + ' : ' + existingTitle
           );
         } else {
           // this stays a new case, no need to add it again
         }
       } else {
-        subcaseCaseMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
+        splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
         keptCaseCount++;
       }
     } else {
       for (const subcase of cases[i].procedurestappen) {
-        if (subcaseCaseMapping[subcase.procedurestap]) {
+        if (splitCasesMapping[subcase.procedurestap]) {
           // we already have a case & decision flow for this one. Mark this triple for removal
-          toRemove.push({ ...cases[i], procedurestappen: [subcase] });
+          casesToRemove.push({ ...cases[i], procedurestappen: [subcase] });
         } else {
           // we need to create a new case & decision flow for this one
-          subcaseCaseMapping[subcase.procedurestap] = {
+          splitCasesMapping[subcase.procedurestap] = {
             procedurestappen: [subcase]
           };
           newCaseCount++;
@@ -461,24 +443,24 @@ const splitIntoSingleSubcases = async function (limit) {
   console.log('Gave default preference to an existing case (as a fallback) in ' + choseExisting + ' instances.');
   console.log('--------------');
   let maxCount = 0;
-  for (const subcaseUrl in subcaseCaseMapping) {
-    if (subcaseCaseMapping.hasOwnProperty(subcaseUrl)) {
-      if (subcaseCaseMapping[subcaseUrl].procedurestappen.length > maxCount) {
-        maxCount = subcaseCaseMapping[subcaseUrl].procedurestappen.length;
+  for (const subcaseUrl in splitCasesMapping) {
+    if (splitCasesMapping.hasOwnProperty(subcaseUrl)) {
+      if (splitCasesMapping[subcaseUrl].procedurestappen.length > maxCount) {
+        maxCount = splitCasesMapping[subcaseUrl].procedurestappen.length;
       }
     }
   }
-  console.log(Object.keys(subcaseCaseMapping).length + ' dossiers in totaal gehouden na opsplitsen.');
+  console.log(Object.keys(splitCasesMapping).length + ' dossiers in totaal gehouden na opsplitsen.');
   console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen.');
   console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
-  return subcaseCaseMapping;
+  return { splitCasesMapping, casesToRemove };
 }
 
 /* Route om de splitIntoSingleSubcases functie te testen. */
 router.get('/mixdossiers-fix-1-dossier-per-procedurestap', async function(req, res) {
   try {
-    let cases = await splitIntoSingleSubcases();
+    let cases = await splitIntoSingleSubcases().splitCasesMapping;
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${Object.keys(cases).length} results`); // dit aantal moet overeenstemmen met queries/aantal_pre_kaleidos_procedurestappen_zonder_speciale_gevallen.sparql
     res.send(cases);
@@ -562,7 +544,8 @@ const getSubcaseCluster = function (startCase, startIndex, casesSearchSet, curre
 /* Neemt de lijst van opgesplitste procedurestappen en groepeert deze door van nieuw naar oud een 'cluster' van procedurestappen te maken via de DORIS properties */
 const clusterSubcases = async function (limit) {
   let clusteredCases = [];
-  let splitCasesMapping = await splitIntoSingleSubcases();
+  let splitIntoSingleSubcasesResult = await splitIntoSingleSubcases();
+  let splitCasesMapping = splitIntoSingleSubcasesResult.splitCasesMapping;
   // We willen deze 1 voor 1 overlopen via de DORIS keys dar_vorige/dar_rel_docs/dar_aanvullend en object_name, van nieuw naar oud om zo een 'cluster' van procedurestappen te maken.
   let splitCases = [];
   for (const procedurestapUrl in splitCasesMapping) {
@@ -570,7 +553,7 @@ const clusterSubcases = async function (limit) {
       splitCases.push(splitCasesMapping[procedurestapUrl]);
     }
   }
-  let casesToBeRemoved = [];
+  let casesToRemove = splitIntoSingleSubcasesResult.casesToRemove;
   // Alle dossiers moeten van nieuw naar oud gesorteerd zijn, en een (voor nu) unieke id krijgen zodat we de juiste kunnen verwijderen
   splitCases.sort((a, b) => { return new Date(b.procedurestappen[0].aanmaakDatum) - new Date(a.procedurestappen[0].aanmaakDatum); });
   for (let i = 0; i < splitCases.length; i++) {
@@ -579,7 +562,7 @@ const clusterSubcases = async function (limit) {
   console.log('Started clustering process...');
   // We beginnen met de nieuwste procedurestap, zodat we altijd de langst mogelijke cluster kunnen maken teruggaande in de tijd.
   let maxCountSoFar = 0;
-  let didntTakeFirstCase = 0;
+  let didntTakeOldestCase = 0;
   while (splitCases.length > 0 && (!limit || clusteredCases.length < limit)) {
     if (splitCases.length % 1000 === 0) {
       console.log(clusteredCases.length + ' geclusterde dossiers. Grootste dossier tot nu toe: ' + maxCountSoFar + ' procedurestappen');
@@ -599,7 +582,7 @@ const clusterSubcases = async function (limit) {
           for (let i = 0; i < subcaseCluster.length; i++) {
             if (subcaseCluster[i].url) {
               caseToKeep = subcaseCluster[i];
-              didntTakeFirstCase++;
+              didntTakeOldestCase++;
             }
           }
         }
@@ -613,7 +596,7 @@ const clusterSubcases = async function (limit) {
               found = true;
               splitCases.splice(j, 1);
               if (caseToKeep.originalIndex !== splitCases[j].originalIndex) {
-                casesToBeRemoved.push(splitCases[j]);
+                casesToRemove.push(splitCases[j]);
               }
             }
           }
@@ -648,22 +631,246 @@ const clusterSubcases = async function (limit) {
       newCaseCount++;
     }
   }
+  // In casesToRemove kunnen dubbels zitten, dus hou een register bij om dubbele lijnen te vermijden, de migraties zijn al groot genoeg.
+  let removedCases = {};
+  let finalCasesToRemove = [];
+  for (const caseToRemove of casesToRemove) {
+    if (caseToRemove.dossier && !removedCases[caseToRemove.dossier]) {
+      removedCases[caseToRemove.dossier] = true;
+      finalCasesToRemove.push(caseToRemove);
+    } else {
+      // hier moet niks mee gebeuren, dit was een tijdelijke case
+    }
+  }
   console.log(clusteredCases.length + ' dossiers overgehouden na clusteren.');
-  console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen. (in ' + didntTakeFirstCase + ' gevallen was dit niet de oudste procedurestap)');
+  console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen. (in ' + didntTakeOldestCase + ' gevallen was dit niet de oudste procedurestap)');
   console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
   console.log('Minimum ' + minCount + ' procedurestap(pen) per dossier.');
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
-  console.log(casesToBeRemoved.length + ' dossiers zijn ergens anders ondergebracht en zullen worden verwijderd.');
-  return { clusteredCases: clusteredCases.sort((a, b) => { return b.procedurestappen.length - a.procedurestappen.length;}).slice(0, limit ? +limit : clusteredCases.length) };
+  console.log(finalCasesToRemove.length + ' dossiers zijn ergens anders ondergebracht en zullen worden verwijderd.');
+  return {
+    clusteredCases: clusteredCases.sort((a, b) => { return b.procedurestappen.length - a.procedurestappen.length;}).slice(0, limit ? +limit : clusteredCases.length),
+    casesToRemove: finalCasesToRemove
+  };
 };
 
 /* Route om de clusterSubcases functie te testen. */
 router.get('/mixdossiers-fix-cluster-procedurestappen', async function(req, res) {
   try {
-    let cases = await clusterSubcases(req.query.limit);
+    let clusterSubcasesResult = await clusterSubcases(req.query.limit);
     const name = req.path.replace('/', '');
-    console.log(`GET /${name}: ${Object.keys(cases).length} results`);
+    console.log(`GET /${name}: ${Object.keys(clusterSubcasesResult.clusteredCases).length} results`);
     res.send(cases);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+});
+
+const createDeletions = async function (casesToRemove) {
+  let dateString = new Date().toISOString();
+  let filenameBase = '' + dateString.replace(/-|T|:|\.|Z/g, '').substring(0, dateString.length - 1) + '-mixdossiers-fix-deletions-';
+  let filenames = [];
+  const BATCH_SIZE = (process.env.BATCH_SIZE && parseInt(process.env.BATCH_SIZE)) || 200;
+  let batchNumber = 1;
+  let currentBatchSize = 0;
+  // Eerst de DELETES voor alle dossiers die niet overgehouden zijn. Deze zitten normaal gezien in casesToRemove
+  console.log(`Migraties worden aangemaakt voor ${Object.keys(casesToRemove).length} te verwijderen dossiers...`);
+  let deleteMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+DELETE {
+  GRAPH ?g {
+    ?dossier ?p1 ?o1 .
+    ?besluitvormingsaangelegenheid ?p2 ?o2 .
+  }
+}
+WHERE {
+  VALUES (?dossier) {
+`;let deleteMigrationQuerySuffix = `  }
+  GRAPH ?g {
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid;
+             ?p1 o1  .
+    ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid;
+                                   ?p2 o2  .
+  }
+}
+`;
+  let currentMigrationQuery = '' + deleteMigrationQueryPrefix;
+  for (const caseToRemove of casesToRemove) {
+    // verwijder het dossier en alle links die er van vertrekken
+    currentMigrationQuery += `     (<${caseToRemove.dossier}>)\n`;
+    currentBatchSize++;
+    if (currentBatchSize === BATCH_SIZE) {
+      currentMigrationQuery += deleteMigrationQuerySuffix;
+      let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+      filenames.push(filePath);
+      await fsp.writeFile(filePath, currentMigrationQuery);
+      console.log('Migration file written to ' + filePath);
+      batchNumber++;
+      currentBatchSize = 0;
+      currentMigrationQuery = '' + deleteMigrationQueryPrefix;
+    }
+  }
+  // don't forget to append the final suffix & write the final batch
+  currentMigrationQuery += deleteMigrationQuerySuffix;
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+  filenames.push(filePath);
+  await fsp.writeFile(filePath, currentMigrationQuery);
+  console.log('Migration file written to ' + filePath);
+  return filenames;
+};
+
+/* Maak de links naar procedurestappen aan voor geclusterde dossiers met bestaande besluitvormingsaangelegenheid URL en meer dan 1 procedurestap (anders zit deze al in de databank normaal gezien)*/
+const createSubcaseLinks = async function (clusteredCases) {
+  let dateString = new Date().toISOString();
+  let filenameBase = '' + dateString.replace(/-|T|:|\.|Z/g, '').substring(0, dateString.length - 1) + '-mixdossiers-fix-subcases-';
+  let filenames = [];
+  const BATCH_SIZE = (process.env.BATCH_SIZE && parseInt(process.env.BATCH_SIZE)) || 200;
+  let batchNumber = 1;
+  let currentBatchSize = 0;
+  // De links mogen enkel gemaakt worden in de graphs waar de procedurestappen al aanwezig zijn en er nog geen link is van de besluitvormingsaangelegenheid
+  console.log(`Migraties worden aangemaakt voor nieuwe procedurestap links voor ${Object.keys(clusteredCases).length} bestaande dossiers...`);
+  let subcaseMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+INSERT {
+  GRAPH ?g {
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
+  }
+}
+WHERE {
+  VALUES (?besluitvormingsaangelegenheid ?procedurestap) {
+`;let subcaseMigrationQuerySuffix = `  }
+  FILTER EXISTS { ?procedurestap ?p ?o . }
+  FILTER NOT EXISTS { ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap . }
+}`;
+  let currentMigrationQuery = '' + subcaseMigrationQueryPrefix;
+  for (const clusteredCase of clusteredCases) {
+    // leg hier enkel links voor bestaande dossiers
+    if (clusteredCase.besluitvormingsaangelegenheid) {
+      if (clusteredCase.procedurestappen.length > 1) {
+        for (const subcase of clusteredCase.procedurestappen) {
+          currentMigrationQuery += `    ( <${clusteredCase.besluitvormingsaangelegenheid}> <${subcase.procedurestap}> )\n`;
+          currentBatchSize++;
+          if (currentBatchSize === BATCH_SIZE) {
+            currentMigrationQuery += subcaseMigrationQuerySuffix;
+            let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+            filenames.push(filePath);
+            await fsp.writeFile(filePath, currentMigrationQuery);
+            console.log('Migration file written to ' + filePath);
+            batchNumber++;
+            currentBatchSize = 0;
+            currentMigrationQuery = '' + subcaseMigrationQueryPrefix;
+          }
+        }
+      }
+    }
+  }
+  // don't forget to append the final suffix & write the final batch
+  currentMigrationQuery += subcaseMigrationQuerySuffix;
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+  filenames.push(filePath);
+  await fsp.writeFile(filePath, currentMigrationQuery);
+  console.log('Migration file written to ' + filePath);
+  return filenames;
+};
+
+/* Maak de nieuwe dossiers aan.
+NOTE: legacy dossiers hebben momenteel geen dct:created.
+We stellen deze achteraf in voor alle dossiers met mixDossiers-migrations/20221218220000-legacy-case-created.sparql */
+const createNewCases = async function (clusteredCases) {
+  let dateString = new Date().toISOString();
+  let filenameBase = '' + dateString.replace(/-|T|:|\.|Z/g, '').substring(0, dateString.length - 1) + '-mixdossiers-fix-new-cases-';
+  let filenames = [];
+  const BATCH_SIZE = (process.env.BATCH_SIZE && parseInt(process.env.BATCH_SIZE)) || 200;
+  let batchNumber = 1;
+  let currentBatchSize = 0;
+  // De links mogen enkel gemaakt worden in de graphs waar de procedurestappen al aanwezig zijn en er nog geen link is van de besluitvormingsaangelegenheid
+  console.log(`Migraties worden aangemaakt voor ${Object.keys(clusteredCases).length} nieuwe dossiers...`);
+  // NOTE: merk op dat we hier nog geen titel instellen. Dit doen we later voor alle legacy dossiers in 1 migratie zodat we een consistente db krijgen
+  let caseMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX dct: <http://purl.org/dc/terms/>
+INSERT {
+  GRAPH ?g {
+    ?dossier a dossier:Dossier .
+    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
+  }
+}
+WHERE {
+  VALUES (?dossier ?besluitvormingsaangelegenheid ?procedurestap) {
+`;let caseMigrationQuerySuffix = `  }
+  FILTER EXISTS { ?procedurestap ?p ?o . }
+}`;
+  let currentMigrationQuery = '' + caseMigrationQueryPrefix;
+  for (const clusteredCase of clusteredCases) {
+    // leg hier enkel links voor nieuwe dossiers
+    if (!clusteredCase.dossier && !clusteredCase.besluitvormingsaangelegenheid) {
+      let dossierUri = CASE_BASE_URI + uuid();
+      let besluitvormingsaangelegenheidUri = DECISIONFLOW_BASE_URI + uuid();
+      for (const subcase of clusteredCase.procedurestappen) {
+        currentMigrationQuery += `    ( <${dossierUri}> <${besluitvormingsaangelegenheidUri}> <${subcase.procedurestap}> )\n`;
+        currentBatchSize++;
+        if (currentBatchSize === BATCH_SIZE) {
+          currentMigrationQuery += caseMigrationQuerySuffix;
+          let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+          filenames.push(filePath);
+          await fsp.writeFile(filePath, currentMigrationQuery);
+          console.log('Migration file written to ' + filePath);
+          batchNumber++;
+          currentBatchSize = 0;
+          currentMigrationQuery = '' + caseMigrationQueryPrefix;
+        }
+      }
+    }
+  }
+  // don't forget to append the final suffix & write the final batch
+  currentMigrationQuery += caseMigrationQuerySuffix;
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+  filenames.push(filePath);
+  await fsp.writeFile(filePath, currentMigrationQuery);
+  console.log('Migration file written to ' + filePath);
+  return filenames;
+};
+
+/* Route om de migraties aan te maken. Schrijft deze weg naar het data volume */
+/*
+  dossier datamodel ter referentie:
+  (define-resource case ()
+    :class (s-prefix "dossier:Dossier")
+    :properties `((:title         :string   ,(s-prefix "dct:title"))
+                  (:short-title   :string   ,(s-prefix "dct:alternative"))
+                  (:created       :datetime ,(s-prefix "dct:created"))
+                  (:number        :number   ,(s-prefix "adms:identifier"))
+                  (:is-archived   :boolean  ,(s-prefix "ext:isGearchiveerd")))
+    :has-one `((decisionmaking-flow  :via      ,(s-prefix "dossier:Dossier.isNeerslagVan")
+                      :as "decisionmaking-flow"))
+    :has-many `((piece             :via      ,(s-prefix "dossier:Dossier.bestaatUit")
+                                   :as "pieces")
+                (publication-flow  :via      ,(s-prefix "dossier:behandelt")
+                                   :inverse t
+                                   :as "publication-flows")
+                (sign-flow         :via      ,(s-prefix "sign:behandeltDossier")
+                                   :inverse t
+                                   :as "sign-flows")
+              )
+    :resource-base (s-url "http://themis.vlaanderen.be/id/dossier/")
+    :features '(include-uri)
+    :on-path "cases")
+*/
+router.get('/mixdossiers-fix-create-migrations', async function(req, res) {
+  try {
+    let clusterSubcasesResult = await clusterSubcases(req.query.limit);
+    const name = req.path.replace('/', '');
+    let removalFilenames = await createDeletions(clusterSubcasesResult.casesToRemove);
+    let subcaseFilenames = await createSubcaseLinks(clusterSubcasesResult.clusteredCases.filter((clusteredCase) => { return clusteredCase.besluitvormingsaangelegenheid; }));
+    let newcaseFilenames = await createNewCases(clusterSubcasesResult.clusteredCases.filter((clusteredCase) => { return !clusteredCase.besluitvormingsaangelegenheid; }));
+    // console.log(`Migraties worden aangemaakt voor ${Object.keys(clusterSubcasesResult.clusteredCases).length} gecorrigeerde dossiers...`);
+    res.send({
+      remark: `Don't forget to include the migrations in /mixDossiers-migrations !`,
+      filenames: [...removalFilenames, ...subcaseFilenames, ...newcaseFilenames]
+    });
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
