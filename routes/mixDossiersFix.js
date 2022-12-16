@@ -691,9 +691,9 @@ WHERE {
 `;let deleteMigrationQuerySuffix = `  }
   GRAPH ?g {
     ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid;
-             ?p1 o1  .
+             ?p1 ?o1  .
     ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid;
-                                   ?p2 o2  .
+                                   ?p2 ?o2  .
   }
 }
 `;
@@ -704,7 +704,7 @@ WHERE {
     currentBatchSize++;
     if (currentBatchSize === BATCH_SIZE) {
       currentMigrationQuery += deleteMigrationQuerySuffix;
-      let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
+      let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + (batchNumber < 10 ? ('0' + batchNumber) : batchNumber) + '.sparql');
       filenames.push(filePath);
       await fsp.writeFile(filePath, currentMigrationQuery);
       console.log('Migration file written to ' + filePath);
@@ -715,7 +715,7 @@ WHERE {
   }
   // don't forget to append the final suffix & write the final batch
   currentMigrationQuery += deleteMigrationQuerySuffix;
-  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + (batchNumber < 10 ? ('0' + batchNumber) : batchNumber) + '.sparql');
   filenames.push(filePath);
   await fsp.writeFile(filePath, currentMigrationQuery);
   console.log('Migration file written to ' + filePath);
@@ -755,7 +755,7 @@ WHERE {
           currentBatchSize++;
           if (currentBatchSize === BATCH_SIZE) {
             currentMigrationQuery += subcaseMigrationQuerySuffix;
-            let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
+            let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + (batchNumber < 10 ? ('0' + batchNumber) : batchNumber) + '.sparql');
             filenames.push(filePath);
             await fsp.writeFile(filePath, currentMigrationQuery);
             console.log('Migration file written to ' + filePath);
@@ -769,7 +769,7 @@ WHERE {
   }
   // don't forget to append the final suffix & write the final batch
   currentMigrationQuery += subcaseMigrationQuerySuffix;
-  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + (batchNumber < 10 ? ('0' + batchNumber) : batchNumber) + '.sparql');
   filenames.push(filePath);
   await fsp.writeFile(filePath, currentMigrationQuery);
   console.log('Migration file written to ' + filePath);
@@ -816,7 +816,7 @@ WHERE {
         currentBatchSize++;
         if (currentBatchSize === BATCH_SIZE) {
           currentMigrationQuery += caseMigrationQuerySuffix;
-          let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
+          let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + (batchNumber < 10 ? ('0' + batchNumber) : batchNumber) + '.sparql');
           filenames.push(filePath);
           await fsp.writeFile(filePath, currentMigrationQuery);
           console.log('Migration file written to ' + filePath);
@@ -829,7 +829,7 @@ WHERE {
   }
   // don't forget to append the final suffix & write the final batch
   currentMigrationQuery += caseMigrationQuerySuffix;
-  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + (batchNumber < 10 ? ('0' + batchNumber) : batchNumber) + '.sparql');
   filenames.push(filePath);
   await fsp.writeFile(filePath, currentMigrationQuery);
   console.log('Migration file written to ' + filePath);
