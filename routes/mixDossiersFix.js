@@ -687,12 +687,12 @@ DELETE {
   }
 }
 WHERE {
-  VALUES (?dossier) {
-`;let deleteMigrationQuerySuffix = `  }
   GRAPH ?g {
-    ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid;
+    VALUES (?dossier) {
+`;let deleteMigrationQuerySuffix = `    }
+      ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid;
              ?p1 ?o1  .
-    ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid;
+      ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid;
                                    ?p2 ?o2  .
   }
 }
@@ -740,10 +740,13 @@ INSERT {
   }
 }
 WHERE {
-  VALUES (?besluitvormingsaangelegenheid ?procedurestap) {
-`;let subcaseMigrationQuerySuffix = `  }
-  FILTER EXISTS { ?procedurestap ?p ?o . }
-  FILTER NOT EXISTS { ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap . }
+  GRAPH ?g {
+    VALUES (?besluitvormingsaangelegenheid ?procedurestap) {
+`;
+let subcaseMigrationQuerySuffix = `    }
+    ?procedurestap ?p ?o .
+    FILTER NOT EXISTS { ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap . }
+  }
 }`;
   let currentMigrationQuery = '' + subcaseMigrationQueryPrefix;
   for (const clusteredCase of clusteredCases) {
@@ -751,7 +754,7 @@ WHERE {
     if (clusteredCase.besluitvormingsaangelegenheid) {
       if (clusteredCase.procedurestappen.length > 1) {
         for (const subcase of clusteredCase.procedurestappen) {
-          currentMigrationQuery += `    ( <${clusteredCase.besluitvormingsaangelegenheid}> <${subcase.procedurestap}> )\n`;
+          currentMigrationQuery += `      ( <${clusteredCase.besluitvormingsaangelegenheid}> <${subcase.procedurestap}> )\n`;
           currentBatchSize++;
           if (currentBatchSize === BATCH_SIZE) {
             currentMigrationQuery += subcaseMigrationQuerySuffix;
@@ -801,9 +804,12 @@ INSERT {
   }
 }
 WHERE {
-  VALUES (?dossier ?besluitvormingsaangelegenheid ?procedurestap) {
-`;let caseMigrationQuerySuffix = `  }
-  FILTER EXISTS { ?procedurestap ?p ?o . }
+  GRAPH ?g {
+    VALUES (?dossier ?besluitvormingsaangelegenheid ?procedurestap) {
+`;
+let caseMigrationQuerySuffix = `    }
+    ?procedurestap ?p ?o .
+  }
 }`;
   let currentMigrationQuery = '' + caseMigrationQueryPrefix;
   for (const clusteredCase of clusteredCases) {
@@ -812,7 +818,7 @@ WHERE {
       let dossierUri = CASE_BASE_URI + uuid();
       let besluitvormingsaangelegenheidUri = DECISIONFLOW_BASE_URI + uuid();
       for (const subcase of clusteredCase.procedurestappen) {
-        currentMigrationQuery += `    ( <${dossierUri}> <${besluitvormingsaangelegenheidUri}> <${subcase.procedurestap}> )\n`;
+        currentMigrationQuery += `      ( <${dossierUri}> <${besluitvormingsaangelegenheidUri}> <${subcase.procedurestap}> )\n`;
         currentBatchSize++;
         if (currentBatchSize === BATCH_SIZE) {
           currentMigrationQuery += caseMigrationQuerySuffix;
