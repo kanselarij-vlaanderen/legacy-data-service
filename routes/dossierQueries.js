@@ -147,56 +147,6 @@ const getProcedureStappenInMixDossiers = async function (limit) {
   return results;
 };
 
-/* Returns an array of sourceIds that are normalized ()*/
-const getSourceIds = function (sourceIdString) {
-  let parsedSourceIds = [];
-  if (sourceIdString) {
-    parsedSourceIds = sourceIdString.split(/[;,]/).filter((id) => {
-      return id.indexOf('VR/JJJJ/DD/MM') === -1;
-    }).map((id) => {
-      if (id.indexOf('/') > -1) {
-        return id.substring(0, id.lastIndexOf('/'));
-      }
-      return id;
-    }).map((id) => {
-      if (id.toUpperCase().indexOf('BIS') > -1) {
-        return id.substring(0, id.toUpperCase().lastIndexOf('BIS'));
-      }
-      if (id.toUpperCase().indexOf('TER') > -1) {
-        return id.substring(0, id.toUpperCase().lastIndexOf('TER'));
-      }
-      return id;
-    });
-  }
-  // remove duplicates for efficiency
-  let sourceIds = [];
-  for (const id of parsedSourceIds) {
-    if (sourceIds.indexOf(id) === -1) {
-      sourceIds.push(id);
-    }
-  }
-  return sourceIds.map((id) => {
-    return id.toUpperCase().trim();
-  });;
-};
-
-/* Returns true if id1 contains id2 (case-insensitive) or vice-versa
-OR if id1 and id2 both contain 'DOC', AND have matching year and identifier */
-const docRegex = /[A-Z][A-Z] ([0-9][0-9][0-9][0-9]).*DOC\.([0-9]?[0-9]?[0-9]?[0-9]?).*/;
-const compareIds = function (id1, id2) {
-  if (id1.indexOf('DOC') > -1 && id2.indexOf('DOC') > -1) {
-    let doc1Ids = id1.match(docRegex);
-    let doc2Ids = id2.match(docRegex);
-    if (doc1Ids && doc2Ids && doc1Ids.length > 2 && doc1Ids.length === doc2Ids.length) {
-      // the identifier could have an inconsistently used prefix 0 (e.g., 0472 vs 472), so we compare both the string values and numerical values
-      if (doc1Ids[1] === doc2Ids[1] && (doc1Ids[2] === doc2Ids[2] || (!isNaN(doc1Ids[2]) && !isNaN(doc2Ids[2]) && +doc1Ids[2] === +doc2Ids[2]))) {
-        return true;
-      }
-    }
-  }
-  return id1.toUpperCase().indexOf(id2.toUpperCase()) > -1 || id2.toUpperCase().indexOf(id1.toUpperCase()) > -1;
-};
-
 const compareStrings = function (string1, string2) {
   if (string1 && string2) {
     if (string1.length > 3 && string2.length > 3 && normalizeString(string2).indexOf(normalizeString(string1)) > -1 || normalizeString(string1).indexOf(normalizeString(string2)) > -1) {
@@ -217,9 +167,9 @@ const getProcedureChain = function (startProcedurestap, allProcedurestappen, cur
   let newChainIds = [startProcedurestap.procedurestap];
   let currentChainIds = currentChain.map((procedurestap) => { return procedurestap.procedurestap; });
   // first we need to follow the dar_vorige & dar_rel_docs identifiers.
-  let vorigeIds = getSourceIds(startProcedurestap.dar_vorige);
-  let relDocIds = getSourceIds(startProcedurestap.dar_rel_docs);
-  let aanvullendIds = getSourceIds(startProcedurestap.dar_aanvullend);
+  let vorigeIds = dorisMetadata.getSourceIds(startProcedurestap.dar_vorige);
+  let relDocIds = dorisMetadata.getSourceIds(startProcedurestap.dar_rel_docs);
+  let aanvullendIds = dorisMetadata.getSourceIds(startProcedurestap.dar_aanvullend);
   // merge the two arrays
   let relevantIds = [];
   for (const id of vorigeIds) {
@@ -248,15 +198,15 @@ const getProcedureChain = function (startProcedurestap, allProcedurestappen, cur
       let added = false;
       for (const id of relevantIds) {
         // in most cases, the id we're looking for should be found in the object_name
-        if (!added && procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
+        if (!added && procedurestap.object_name && dorisMetadata.compareIds(procedurestap.object_name, id)) {
           relevantProcedurestappen.push(procedurestap);
           added = true;
         }
         // the id can also be in dar_rel_docs in some cases
         if (!added && procedurestap.dar_rel_docs) {
-          const relDocIds = getSourceIds(procedurestap.dar_rel_docs);
+          const relDocIds = dorisMetadata.getSourceIds(procedurestap.dar_rel_docs);
           for (const relDocId of relDocIds) {
-            if (compareIds(relDocId, id)) {
+            if (dorisMetadata.compareIds(relDocId, id)) {
               relevantProcedurestappen.push(procedurestap);
               added = true;
             }
@@ -304,7 +254,7 @@ const validateIncompleteChain = function (dossier, strict, tolerance, thresholds
     let relevantSubjects = [];
     let relevantKeywords = [];
     for (const correctProcedurestap of correctChain) {
-      let sourceIds = getSourceIds(correctProcedurestap.object_name);
+      let sourceIds = dorisMetadata.getSourceIds(correctProcedurestap.object_name);
       for (const sourceId of sourceIds) {
         if (relevantIds.indexOf(sourceId) === -1) {
           relevantIds.push(sourceId);
@@ -327,7 +277,7 @@ const validateIncompleteChain = function (dossier, strict, tolerance, thresholds
       // First we can check whether the object_name of a link in the chain occurs somewhere else in the same dossier,
       // which would also be valid
       for (const id of relevantIds) {
-        if (procedurestap.object_name && compareIds(procedurestap.object_name, id)) {
+        if (procedurestap.object_name && dorisMetadata.compareIds(procedurestap.object_name, id)) {
           if (procedurestap.maxSimScores.object_name === undefined) {
             procedurestap.maxSimScores.object_name = 0;
           }
