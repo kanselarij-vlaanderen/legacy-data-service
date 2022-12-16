@@ -668,8 +668,8 @@ router.get('/mixdossiers-fix-cluster-procedurestappen', async function(req, res)
 });
 
 const createDeletions = async function (casesToRemove) {
-  let dateString = new Date().toISOString();
-  let filenameBase = '' + dateString.replace(/-|T|:|\.|Z/g, '').substring(0, dateString.length - 1) + '-mixdossiers-fix-deletions-';
+  let dateString = new Date().toISOString().replace(/-|T|:|\.|Z/g, '');
+  let filenameBase = '' + dateString.substring(0, dateString.length - 3) + '-mixdossiers-fix-deletions';
   let filenames = [];
   const BATCH_SIZE = (process.env.BATCH_SIZE && parseInt(process.env.BATCH_SIZE)) || 200;
   let batchNumber = 1;
@@ -702,7 +702,7 @@ WHERE {
     currentBatchSize++;
     if (currentBatchSize === BATCH_SIZE) {
       currentMigrationQuery += deleteMigrationQuerySuffix;
-      let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+      let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
       filenames.push(filePath);
       await fsp.writeFile(filePath, currentMigrationQuery);
       console.log('Migration file written to ' + filePath);
@@ -713,7 +713,7 @@ WHERE {
   }
   // don't forget to append the final suffix & write the final batch
   currentMigrationQuery += deleteMigrationQuerySuffix;
-  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
   filenames.push(filePath);
   await fsp.writeFile(filePath, currentMigrationQuery);
   console.log('Migration file written to ' + filePath);
@@ -722,8 +722,8 @@ WHERE {
 
 /* Maak de links naar procedurestappen aan voor geclusterde dossiers met bestaande besluitvormingsaangelegenheid URL en meer dan 1 procedurestap (anders zit deze al in de databank normaal gezien)*/
 const createSubcaseLinks = async function (clusteredCases) {
-  let dateString = new Date().toISOString();
-  let filenameBase = '' + dateString.replace(/-|T|:|\.|Z/g, '').substring(0, dateString.length - 1) + '-mixdossiers-fix-subcases-';
+  let dateString = new Date().toISOString().replace(/-|T|:|\.|Z/g, '');
+  let filenameBase = '' + dateString.substring(0, dateString.length - 3) + '-mixdossiers-fix-subcases';
   let filenames = [];
   const BATCH_SIZE = (process.env.BATCH_SIZE && parseInt(process.env.BATCH_SIZE)) || 200;
   let batchNumber = 1;
@@ -753,7 +753,7 @@ WHERE {
           currentBatchSize++;
           if (currentBatchSize === BATCH_SIZE) {
             currentMigrationQuery += subcaseMigrationQuerySuffix;
-            let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+            let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
             filenames.push(filePath);
             await fsp.writeFile(filePath, currentMigrationQuery);
             console.log('Migration file written to ' + filePath);
@@ -767,7 +767,7 @@ WHERE {
   }
   // don't forget to append the final suffix & write the final batch
   currentMigrationQuery += subcaseMigrationQuerySuffix;
-  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
   filenames.push(filePath);
   await fsp.writeFile(filePath, currentMigrationQuery);
   console.log('Migration file written to ' + filePath);
@@ -778,8 +778,8 @@ WHERE {
 NOTE: legacy dossiers hebben momenteel geen dct:created.
 We stellen deze achteraf in voor alle dossiers met mixDossiers-migrations/20221218220000-legacy-case-created.sparql */
 const createNewCases = async function (clusteredCases) {
-  let dateString = new Date().toISOString();
-  let filenameBase = '' + dateString.replace(/-|T|:|\.|Z/g, '').substring(0, dateString.length - 1) + '-mixdossiers-fix-new-cases-';
+  let dateString = new Date().toISOString().replace(/-|T|:|\.|Z/g, '');
+  let filenameBase = '' + dateString.substring(0, dateString.length - 3) + '-mixdossiers-fix-new-cases';
   let filenames = [];
   const BATCH_SIZE = (process.env.BATCH_SIZE && parseInt(process.env.BATCH_SIZE)) || 200;
   let batchNumber = 1;
@@ -814,7 +814,7 @@ WHERE {
         currentBatchSize++;
         if (currentBatchSize === BATCH_SIZE) {
           currentMigrationQuery += caseMigrationQuerySuffix;
-          let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+          let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
           filenames.push(filePath);
           await fsp.writeFile(filePath, currentMigrationQuery);
           console.log('Migration file written to ' + filePath);
@@ -827,7 +827,7 @@ WHERE {
   }
   // don't forget to append the final suffix & write the final batch
   currentMigrationQuery += caseMigrationQuerySuffix;
-  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparl');
+  let filePath = path.resolve(SPARQL_EXPORT_FOLDER + '/' + filenameBase + '-' + batchNumber + '.sparql');
   filenames.push(filePath);
   await fsp.writeFile(filePath, currentMigrationQuery);
   console.log('Migration file written to ' + filePath);
