@@ -669,7 +669,7 @@ const clusterSubcases = async function (limit) {
     }
     // we weten dat splitCases sowieso 1 enkele procedurestap hebben
     if (splitCases[0].procedurestappen[0].dorisRecord) {
-      // probeer via dar_vorige, dar_rel_docs en dar_aanvullend een cluster van procedurestappen te vinden
+      // probeer via dar_vorige een cluster van procedurestappen te vinden
       let subcaseCluster = getSubcaseCluster(splitCases[0], 0, splitCases);
       if (subcaseCluster.length > 1) {
         if (maxCountSoFar < subcaseCluster.length) {
@@ -678,7 +678,7 @@ const clusterSubcases = async function (limit) {
         let caseToKeep = subcaseCluster[subcaseCluster.length - 1];
         if (!caseToKeep.url) {
           // neem een bestaand dossier bij voorkeur
-          for (let i = 0; i < subcaseCluster.length; i++) {
+          for (let i = subcaseCluster.length - 1; !caseToKeep.url && i >= 0; i--) {
             if (subcaseCluster[i].url) {
               caseToKeep = subcaseCluster[i];
               didntTakeOldestCase++;
@@ -688,15 +688,16 @@ const clusterSubcases = async function (limit) {
         // Eens een cluster is gevormd, worden alle procedurestappen in die cluster samengevoegd onder het dossier van de oudste procedurestap en uit de zoekset genomen.
         // we voegen alle procedurestappen bij de oudste besluitvormingsaangelegenheid, behalve de procedurestap die er al in zit
         caseToKeep.procedurestappen = subcaseCluster.map((clusteredCase) => { return clusteredCase.procedurestappen[0]; })
+        // neem deze procedurestappen uit de zoekset
         for (let i = 0; i < subcaseCluster.length ; i++) {
           let found = false;
           for (let j = 0; !found && j < splitCases.length; j++) {
             if (subcaseCluster[i].originalIndex === splitCases[j].originalIndex) {
               found = true;
-              splitCases.splice(j, 1);
               if (caseToKeep.originalIndex !== splitCases[j].originalIndex) {
                 casesToRemove.push(splitCases[j]);
               }
+              splitCases.splice(j, 1);
             }
           }
         }
