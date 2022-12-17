@@ -367,8 +367,7 @@ router.get('/mixdossiers-fix-get-alle-dossiers', async function(req, res) {
     }
 */
 const splitIntoSingleSubcases = async function (limit) {
-  let cases = await getDossiers(limit ? +limit : 0, 'desc'); // hier zitten de foute procedurestappen bij, die er sowieso uit moeten
-  console.log(cases.length + ' dossiers opgehaald');
+  let cases = await getDossiers(0, 'desc'); // hier zitten de foute procedurestappen bij, die er sowieso uit moeten
   // haal eerst deze foute procedurestappen er uit. Later gaan we hier nog eens over om de te verwijderen triples aan te maken.
   for (let i = 0; i < cases.length; i++) {
     for (var j = 0; j < cases[i].procedurestappen.length; j++) {
@@ -379,7 +378,7 @@ const splitIntoSingleSubcases = async function (limit) {
     }
   }
   let splitCasesMapping = {}; // keep track of which cases/decisionflows were added for each subcase. We'll store the kaleidos url in here for convenience
-  let casesToRemove = [];
+  let casesToRemove = {}; // make this an object so we only remove each case once
   let doubleSubcaseCount = 0;
   let pubCount = 0;
   let noPubCount = 0;
@@ -391,7 +390,7 @@ const splitIntoSingleSubcases = async function (limit) {
   for (let i = 0; i < cases.length; i++) {
     if (cases[i].procedurestappen.length === 0) {
       // deze dossiers bestonden uitsluitend uit procedurestappen die in de speciale gevallen voorkomen. Deze moeten dus sowieso verwijderd worden.
-      casesToRemove.push(cases[i]);
+      casesToRemove[cases[i].dossier] = cases[i];
     } else if (cases[i].procedurestappen.length === 1) {
       // check if we already added this subcase
       if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap]) {
@@ -399,6 +398,8 @@ const splitIntoSingleSubcases = async function (limit) {
         // We should replace that case with this existing one
         if (cases[i].url && !splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url) {
           splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
+          keptCaseCount++;
+          newCaseCount--;
         } else if (cases[i].url && splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url) {
           // NOTE: dit gebeurt omdat er 2 dossiers zijn waaruit foute procedurestappen zijn gefilterd, en beide nu slechts 1 juiste procedurestap overhouden.
           // Hier kunnen we op basis van de properties van het dossier kiezen dewelke te houden
@@ -407,27 +408,47 @@ const splitIntoSingleSubcases = async function (limit) {
           const existingTitle = await kaleidosData.getTitleForSubject(splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier);
           // indien er een publicatie is bij 1 dossier, hou die sowieso
           if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length === 0 && cases[i].publicatieDossiers.length > 0) {
-            // verwijder het bestaande dossier.
-            casesToRemove.push(splitCasesMapping[cases[i].procedurestappen[0].procedurestap]);
+            // verwijder het bestaande dossier en hou het huidige dossier.
+            casesToRemove[splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier] = splitCasesMapping[cases[i].procedurestappen[0].procedurestap];
             splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
             chosePublication++;
+            if (casesToRemove[cases[i].dossier]) {
+              // als dit dossier te verwijderen stond, moeten we het nu toch houden.
+              throw 'Dossier verkeerd gemarkeerd als te verwijderen';
+            }
           } else if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length > 0) {
-            // verwijder het huidige dossier.
-            casesToRemove.push(cases[i]);
+            // verwijder het huidige dossier en hou het bestaande dossier.
+            casesToRemove[cases[i].dossier] = cases[i];
             chosePublication++;
+            if (casesToRemove[splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier]) {
+              // als dit dossier te verwijderen stond, moeten we het nu toch houden.
+              throw 'Dossier verkeerd gemarkeerd als te verwijderen';
+            }
           } else if (subcaseTitle !== existingTitle && subcaseTitle === currentTitle) {
-            // als de titel matcht met de procedurestap, hou dan het huidige dossier.
-            casesToRemove.push(splitCasesMapping[cases[i].procedurestappen[0].procedurestap]);
+            // als de titel matcht met de procedurestap, verwijder het bestaande dossier en hou het huidige dossier.
+            casesToRemove[splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier] = splitCasesMapping[cases[i].procedurestappen[0].procedurestap];
             splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
+            if (casesToRemove[cases[i].dossier]) {
+              // als dit dossier te verwijderen stond, moeten we het nu toch houden.
+              throw 'Dossier verkeerd gemarkeerd als te verwijderen';
+            }
             choseTitle++;
           } else if (subcaseTitle === existingTitle) {
-            // als de titel matcht met de procedurestap, hou dan het huidige dossier.
-            casesToRemove.push(cases[i]);
+            // als de titel matcht met de procedurestap, verwijder het huidige dossier en hou het bestaande dossier.
+            casesToRemove[cases[i].dossier] = cases[i];
             choseTitle++;
+            if (casesToRemove[splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier]) {
+              // als dit dossier te verwijderen stond, moeten we het nu toch houden.
+              throw 'Dossier verkeerd gemarkeerd als te verwijderen';
+            }
           } else {
-            // verwijder het huidige dossier.
-            casesToRemove.push(cases[i]);
+            // verwijder het huidige dossier en hou het bestaande dossier.
+            casesToRemove[cases[i].dossier] = cases[i];
             choseExisting++;
+            if (casesToRemove[splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier]) {
+              // als dit dossier te verwijderen stond, moeten we het nu toch houden.
+              throw 'Dossier verkeerd gemarkeerd als te verwijderen';
+            }
           }
           // detecteer de verschillen tussen deze besluitvormingsaangelegenheden
           // let differentTriples = await kaleidosData.compareResources(cases[i].besluitvormingsaangelegenheid, splitCasesMapping[cases[i].procedurestappen[0].procedurestap].besluitvormingsaangelegenheid);
@@ -462,10 +483,11 @@ const splitIntoSingleSubcases = async function (limit) {
         keptCaseCount++;
       }
     } else {
+      // we need to delete this one and all subcase links in any case
+      casesToRemove[cases[i].dossier] = cases[i];
       for (const subcase of cases[i].procedurestappen) {
         if (splitCasesMapping[subcase.procedurestap]) {
-          // we already have a case & decision flow for this one. Mark this triple for removal
-          casesToRemove.push({ ...cases[i], procedurestappen: [subcase] });
+          // we already have a case & decision flow for this one.
         } else {
           // we need to create a new case & decision flow for this one
           splitCasesMapping[subcase.procedurestap] = {
@@ -485,19 +507,50 @@ const splitIntoSingleSubcases = async function (limit) {
   console.log('Gave default preference to an existing case (as a fallback) in ' + choseExisting + ' instances.');
   console.log('--------------');
   let maxCount = 0;
+  let keptCases = {};
+  let newCases = {};
   for (const subcaseUrl in splitCasesMapping) {
     if (splitCasesMapping.hasOwnProperty(subcaseUrl)) {
+      if (splitCasesMapping[subcaseUrl].dossier && !keptCases[splitCasesMapping[subcaseUrl].dossier]) {
+        keptCases[splitCasesMapping[subcaseUrl].dossier] = splitCasesMapping[subcaseUrl];
+      } else if (!splitCasesMapping[subcaseUrl].dossier && !newCases[subcaseUrl]) {
+          newCases[subcaseUrl] = splitCasesMapping[subcaseUrl];
+        }
       if (splitCasesMapping[subcaseUrl].procedurestappen.length > maxCount) {
         maxCount = splitCasesMapping[subcaseUrl].procedurestappen.length;
       }
     }
   }
+  console.log(cases.filter((originalCase) => { return originalCase.dossier; }).length + ' oorspronkelijke dossiers opgehaald.');
   console.log(Object.keys(splitCasesMapping).length + ' dossiers in totaal gehouden na opsplitsen.');
-  console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen.');
-  console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
-  console.log(casesToRemove.length + ' dossiers zullen worden verwijderd na deze stap.');
+  console.log(Object.keys(keptCases).length + ' hiervan zijn behouden zoals voorheen.');
+  if (Object.keys(keptCases).length !== keptCaseCount) {
+    throw 'Something went wrong (wrong number of kept cases).';
+  }
+  console.log(Object.keys(newCases).length + ' hiervan zijn nieuw en hebben nog geen URL.');
+  if (Object.keys(newCases).length !== newCaseCount) {
+    throw 'Something went wrong (wrong number of new cases).';
+  }
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
-  return { splitCasesMapping, casesToRemove };
+  let removalArray = [];
+  for (const dossierUri in casesToRemove) {
+    if (casesToRemove.hasOwnProperty(dossierUri)) {
+      removalArray.push(casesToRemove[dossierUri]);
+    }
+  }
+  console.log(removalArray.length + ' dossiers zullen worden verwijderd na deze stap.');
+  console.log('... waarvan ' + removalArray.filter((caseToRemove) => { return caseToRemove.procedurestappen.length === 1; }).length + ' met 1 procedurestap (die dus dubbel waren).');
+  // check if all original cases were either kept or marked for removal
+  for (const originalCase of cases) {
+    if (!keptCases[originalCase.dossier] && !casesToRemove[originalCase.dossier]) {
+      console.log(originalCase);
+      throw 'Case in limbo: ' + originalCase.dossier;
+    }
+  }
+  return {
+    splitCasesMapping,
+    casesToRemove: removalArray
+  };
 }
 
 /* Route om de splitIntoSingleSubcases functie te testen. */
@@ -506,7 +559,10 @@ router.get('/mixdossiers-fix-1-dossier-per-procedurestap', async function(req, r
     let result = await splitIntoSingleSubcases();
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${Object.keys(result.splitCasesMapping).length} results`);
-    res.send(result);
+    res.send({
+      // splitCasesMapping: result.splitCasesMapping,
+      casesToRemove: result.casesToRemove.sort((a, b) => { return b.aantalProcedurestappen - a.aantalProcedurestappen;}).slice(0, req.query.limit ? +req.query.limit : result.casesToRemove.length)
+    });
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
@@ -692,7 +748,7 @@ const clusterSubcases = async function (limit) {
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
   console.log(finalCasesToRemove.length + ' dossiers zijn ergens anders ondergebracht en zullen worden verwijderd.');
   return {
-    clusteredCases: clusteredCases.sort((a, b) => { return b.procedurestappen.length - a.procedurestappen.length;}).slice(0, limit ? +limit : clusteredCases.length),
+    clusteredCases: clusteredCases.sort((a, b) => { return b.procedurestappen.length - a.procedurestappen.length;}),
     casesToRemove: finalCasesToRemove
   };
 };
@@ -706,8 +762,12 @@ router.get('/mixdossiers-fix-cluster-procedurestappen', async function(req, res)
       clusterSubcasesResult = await clusterSubcases(req.query.limit);
       await caching.writeLocalFile(name, clusterSubcasesResult);
     }
-    console.log(`GET /${name}: ${Object.keys(clusterSubcasesResult.clusteredCases).length} results`);
-    res.send(cases);
+    console.log(`GET /${name}: ${Object.keys(clusterSubcasesResult.clusteredCases).length} geclusterde dossiers.`);
+    console.log(`GET /${name}: ${clusterSubcasesResult.casesToRemove.length} dossiers zullen worden verwijderd`);
+    res.send({
+      clusteredCases: clusterSubcasesResult.clusteredCases.slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.clusteredCases.length), // limit is for easier inspection
+      casesToRemove: clusterSubcasesResult.casesToRemove.sort((a, b) => { return b.aantalProcedurestappen - a.aantalProcedurestappen;}).slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.casesToRemove.length)
+    });
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
