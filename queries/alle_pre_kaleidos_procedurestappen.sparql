@@ -14,7 +14,6 @@ SELECT DISTINCT ?procedurestap ?besluitvormingsaangelegenheid ?dossier ?publicat
     ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid .
     ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
     ?procedurestap dct:created ?aanmaakDatum .
-    FILTER ( ?aanmaakDatum < xsd:dateTime("2019-10-02T02:00:00Z"))
     ?activity besluitvorming:vindtPlaatsTijdens ?procedurestap .
     ?activity besluitvorming:genereertAgendapunt ?agendapunt .
     ?agenda dct:hasPart ?agendapunt .
@@ -24,4 +23,4 @@ SELECT DISTINCT ?procedurestap ?besluitvormingsaangelegenheid ?dossier ?publicat
     OPTIONAL { ?publicatieDossier a pub:Publicatieaangelegenheid; dossier:behandelt ?dossier . }
     OPTIONAL {  ?procedurestap dct:source ?source . }
   }
-} ORDER BY ?aanmaakDatum
+} ORDER BY DESC(?aanmaakDatum)
