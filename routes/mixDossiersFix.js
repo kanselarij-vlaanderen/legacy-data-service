@@ -112,7 +112,7 @@ const getFlaggedCases = async function (limit, exceptions) {
   }
   // groepeer results per dossier
   let cases = {};
-  let uniqueSubcases = [];
+  let faultySubcases = [];
   for (const result of results) {
     if (result.dossier && exceptions.cases.indexOf(result.dossier) === -1) { // hou de dossiers met nieuwere procedurestappen uit deze fix
       if (!cases[result.dossier]) {
@@ -138,8 +138,8 @@ const getFlaggedCases = async function (limit, exceptions) {
           faulty: true
         });
       }
-      if (uniqueSubcases.indexOf(result.procedurestap) === -1) {
-        uniqueSubcases.push(result.procedurestap);
+      if (faultySubcases.indexOf(result.procedurestap) === -1) {
+        faultySubcases.push(result.procedurestap);
       }
       if (result.publicatieDossier && cases[result.dossier].publicatieDossiers.indexOf(result.publicatieDossier) === -1) {
         cases[result.dossier].publicatieDossiers.push(result.publicatieDossier);
@@ -149,7 +149,7 @@ const getFlaggedCases = async function (limit, exceptions) {
     }
   }
   // statistieken ter controle (vergeleken met SPARQL queries)
-  console.log(uniqueSubcases.length + ' fout gemigreerde procedurestappen in ' + Object.keys(cases).length + ' besluitvormingsaangelegenheden (met overlap).');
+  console.log(faultySubcases.length + ' fout gemigreerde procedurestappen in ' + Object.keys(cases).length + ' besluitvormingsaangelegenheden (met overlap).');
   return cases;
 };
 
@@ -161,7 +161,9 @@ const getDossiers = async function (limit, order) {
   // groepeer results per dossier
   let cases = {};
   let undefinedDorisIds = [];// gebruikt om te kijken hoeveel informatie in DORIS we missen
+  let skippedCases = []; // procedurestappen die in een dossier zitten met een agendering na 2019-10-01 worden geskipt
   let skippedSubcases = []; // procedurestappen die in een dossier zitten met een agendering na 2019-10-01 worden geskipt
+  let uniqueSubcases = {};
   for (const result of results) {
     if (result.dossier && exceptions.cases.indexOf(result.dossier) === -1) { // keep the cases that have newer subcases out of this fix
       if (!cases[result.dossier]) {
@@ -174,37 +176,48 @@ const getDossiers = async function (limit, order) {
           procedurestappen: []
         };
       }
-      // procedurestappen met doris info
-      let dorisId = result.source ? result.source.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '') : undefined;
-      if (dorisId && dorisId.indexOf('/') > -1) {
-        console.log('***************');
-        console.log('WARNING: dorid id ' + dorisId + ' is not what we expected');
-        console.log('***************');
-      } else if (!dorisId) {
-        undefinedDorisIds.push(result);
-      }
-      let dorisRecord = dorisMetadata.lookup(dorisId);
-      let foundSubcase = false;
-      for (let i = 0; !foundSubcase && i < cases[result.dossier].procedurestappen.length; i++) {
-        if (cases[result.dossier].procedurestappen[i].procedurestap === result.procedurestap) {
-          foundSubcase = true;
+      // als deze procedurestap in de speciale gevallen voorkomt, mag deze niet opnieuw gebruikt worden
+      if (exceptions.subcases.indexOf(result.procedurestap) === -1) {
+        // procedurestappen met doris info
+        let dorisId = result.source ? result.source.replace('http://doris.vlaanderen.be/export/', '').replace('-pdf', '') : undefined;
+        if (dorisId && dorisId.indexOf('/') > -1) {
+          console.log('***************');
+          console.log('WARNING: dorid id ' + dorisId + ' is not what we expected');
+          console.log('***************');
+        } else if (!dorisId) {
+          undefinedDorisIds.push(result);
         }
-      }
-      if (!foundSubcase) {
-        cases[result.dossier].procedurestappen.push({
-          procedurestap: result.procedurestap,
-          aanmaakDatum: result.aanmaakDatum,
-          dorisId: dorisId,
-          // dorisRecord: dorisRecord
-          dorisRecord: dorisRecord === undefined ? undefined : { // selecteer enkel de relevante properties hieruit, om geheugen te sparen en de browser niet te overbelasten bij inspectie
-            'object_name': dorisRecord['object_name'],
-            'dar_vorige': dorisRecord['dar_vorige'],
-            'dar_rel_docs': dorisRecord['dar_rel_docs'],
-            'dar_aanvullend': dorisRecord['dar_aanvullend'],
-            'dar_onderwerp': dorisRecord['dar_onderwerp'],
-            'dar_doc_type': dorisRecord['dar_doc_type']
+        let dorisRecord = dorisMetadata.lookup(dorisId);
+        let foundSubcase = false;
+        for (let i = 0; !foundSubcase && i < cases[result.dossier].procedurestappen.length; i++) {
+          if (cases[result.dossier].procedurestappen[i].procedurestap === result.procedurestap) {
+            foundSubcase = true;
           }
-        });
+        }
+        if (!foundSubcase) {
+          cases[result.dossier].procedurestappen.push({
+            procedurestap: result.procedurestap,
+            aanmaakDatum: result.aanmaakDatum,
+            dorisId: dorisId,
+            // dorisRecord: dorisRecord
+            dorisRecord: dorisRecord === undefined ? undefined : { // selecteer enkel de relevante properties hieruit, om geheugen te sparen en de browser niet te overbelasten bij inspectie
+              'object_name': dorisRecord['object_name'],
+              'dar_vorige': dorisRecord['dar_vorige'],
+              'dar_rel_docs': dorisRecord['dar_rel_docs'],
+              'dar_aanvullend': dorisRecord['dar_aanvullend'],
+              'dar_onderwerp': dorisRecord['dar_onderwerp'],
+              'dar_doc_type': dorisRecord['dar_doc_type']
+            }
+          });
+          // hou dit bij zodat we kunnen nagaan hoeveel procedurestappen hierin worden opgehaald
+          if (!uniqueSubcases[result.procedurestap]) {
+            uniqueSubcases[result.procedurestap] = true;
+          }
+        }
+      } else {
+        if (skippedSubcases.indexOf(result.procedurestap) === -1) {
+          skippedSubcases.push(result.procedurestap);
+        }
       }
       // publicaties
       if (result.publicatieDossier && cases[result.dossier].publicatieDossiers.indexOf(result.publicatieDossier) === -1) {
@@ -215,64 +228,89 @@ const getDossiers = async function (limit, order) {
         throw "There is more than 1 decisionFlow for a case. This shouldn't happen!";
       }
     } else {
-      if (skippedSubcases.indexOf(result.procedurestap) === -1) {
-        skippedSubcases.push(result.procedurestap);
+      if (exceptions.cases.indexOf(result.dossier) > -1) {
+        if (skippedCases.indexOf(result.dossier) === -1) {
+          skippedCases.push(result.dossier);
+        }
+      } else {
+        throw 'Query resultaat gevonden zonder dossier URL.';
       }
     }
   }
+  console.log(`${Object.keys(cases).length} dossiers opgehaald (zonder speciale gevallen)`);
+  console.log(`${Object.keys(uniqueSubcases).length} unieke procedurestappen opgehaald.`); // dit aantal moet overeenstemmen met queries/aantal_pre_kaleidos_procedurestappen_zonder_speciale_gevallen.sparql min het aantal geskipte procedurestappen (zie logs)
   // deze moeten we apart toevoegen aan de dossiers om de juiste DELETE queries te genereren, want deze procedurestappen zaten niet in de originele query (ze hebben geen agendering zoals het moet)
   let flaggedCases = await getFlaggedCases(limit, exceptions);
   let flaggedSubcaseCount = 0;
   let flaggedPubflowCount = 0;
   let newCaseCount = 0;
+  let faultyCaseCount = 0;
   let existingCaseCount = 0;
   for (const dossierUrl in flaggedCases) {
-    if (cases[dossierUrl]) {
-      existingCaseCount++;
-      // dit dossier zat al in de oorspronkelijke query, merge de procedurestappen en publicatieDossiers
-      for (const procedurestap of flaggedCases[dossierUrl].procedurestappen) {
-        let foundSubcase = false;
-        for (let i = 0; !foundSubcase && i < cases[dossierUrl].procedurestappen.length; i++) {
-          if (cases[dossierUrl].procedurestappen[i].procedurestap === procedurestap.procedurestap) {
-            foundSubcase = true;
+    if (flaggedCases.hasOwnProperty(dossierUrl)) {
+      if (cases[dossierUrl]) {
+        existingCaseCount++;
+        // dit dossier zat al in de oorspronkelijke query, merge de procedurestappen en publicatieDossiers
+        for (const procedurestap of flaggedCases[dossierUrl].procedurestappen) {
+          let foundSubcase = false;
+          for (let i = 0; !foundSubcase && i < cases[dossierUrl].procedurestappen.length; i++) {
+            if (cases[dossierUrl].procedurestappen[i].procedurestap === procedurestap.procedurestap) {
+              foundSubcase = true;
+            }
+          }
+          if (!foundSubcase) {
+            cases[dossierUrl].procedurestappen.push(procedurestap);
+            flaggedSubcaseCount++;
           }
         }
-        if (!foundSubcase) {
-          cases[dossierUrl].procedurestappen.push(procedurestap);
-          flaggedSubcaseCount++;
+        for (const publicatieDossier of flaggedCases[dossierUrl].publicatieDossiers) {
+          if (cases[dossierUrl].publicatieDossiers.indexOf(publicatieDossier) === -1) {
+            cases[dossierUrl].publicatieDossiers.push(publicatieDossier);
+            flaggedPubflowCount++;
+          }
+        }
+      } else {
+        // maak een nieuwe record aan voor dit dossier (hoewel deze volledig uit foutieve procedurestappen bestaat)
+        const besluitvormingsaangelegenheidId = flaggedCases[dossierUrl].besluitvormingsaangelegenheid.substring(flaggedCases[dossierUrl].besluitvormingsaangelegenheid.lastIndexOf('/') + 1);
+        cases[dossierUrl] = {
+          dossier: flaggedCases[dossierUrl].dossier,
+          besluitvormingsaangelegenheid: flaggedCases[dossierUrl].besluitvormingsaangelegenheid,
+          publicatieDossiers: [],
+          url: `${BASE_URL}/dossiers/${besluitvormingsaangelegenheidId}/deeldossiers`,
+          procedurestappen: flaggedCases[dossierUrl].procedurestappen
+        }
+        let countFaulty = 0;
+        for (const subcase of cases[dossierUrl].procedurestappen) {
+          if (subcase.faulty) {
+            countFaulty++;
+          }
+        }
+        if (countFaulty === cases[dossierUrl].procedurestappen.length) {
+          faultyCaseCount++;
+        } else {
+          throw "Fount gemigreerd dossier gevonden dat in de originele resultaat set had moeten zitten: " + result.dossier;
         }
       }
-      for (const publicatieDossier of flaggedCases[dossierUrl].publicatieDossiers) {
-        if (cases[dossierUrl].publicatieDossiers.indexOf(publicatieDossier) === -1) {
-          cases[dossierUrl].publicatieDossiers.push(publicatieDossier);
-          flaggedPubflowCount++;
-        }
-      }
-    } else {
-      // maak een nieuwe record aan voor dit dossier
-      const besluitvormingsaangelegenheidId = flaggedCases[dossierUrl].besluitvormingsaangelegenheid.substring(flaggedCases[dossierUrl].besluitvormingsaangelegenheid.lastIndexOf('/') + 1);
-      cases[dossierUrl] = {
-        dossier: flaggedCases[dossierUrl].dossier,
-        besluitvormingsaangelegenheid: flaggedCases[dossierUrl].besluitvormingsaangelegenheid,
-        publicatieDossiers: [],
-        url: `${BASE_URL}/dossiers/${besluitvormingsaangelegenheidId}/deeldossiers`,
-        procedurestappen: flaggedCases[dossierUrl].procedurestappen
-      }
-      newCaseCount++;
     }
   }
-  console.log(newCaseCount + ' flagged cases were added to the result set');
-  console.log(flaggedSubcaseCount + ' flagged subcases were merged into the existing result set');
-  console.log(flaggedPubflowCount + ' flagged publication flows were merged into the existing result set');
+  console.log(faultyCaseCount + ' fout gemigreerde dossiers toegevoegd. Deze worden sowieso verwijderd.');
+  console.log('De fout gemigreerde procedurestappen werden samen ' + flaggedSubcaseCount + ' keer in de bestaande resultaatset bijgevoegd');
+  console.log(flaggedPubflowCount + ' fout gemigreerde publicatiedossiers werden in de resultaatset bijgevoegd');
+  let emptyCases = 0;
   const resultArray = [];
   for (const dossierUrl in cases) {
     if (cases.hasOwnProperty(dossierUrl)) {
       cases[dossierUrl].aantalProcedurestappen = cases[dossierUrl].procedurestappen.length;
       resultArray.push(cases[dossierUrl]);
+      if (cases[dossierUrl].aantalProcedurestappen === 0) {
+        emptyCases++;
+      }
     }
   }
-  console.log('There were ' + undefinedDorisIds.length + ' subcases with undefined doris sources.');
-  console.log(skippedSubcases.length + ' subcases were skipped due to being in a case with newer, post-kaleidos subcases');
+  console.log('Er waren ' + undefinedDorisIds.length + ' procedurestappen zonder DORIS bron.');
+  console.log('Er werd ' + skippedCases.length + ' keer een dossier geskipt omdat dit dossier nieuwere, post-kaleidos procedurestappen bevat.');
+  console.log('Er werd ' + skippedSubcases.length + ' keer een procedurestap geskipt omdat deze in een ander dossier voorkomt met nieuwere, post-kaleidos procedurestappen.');
+  console.log('Er bleven hierna ' + emptyCases + ' dossiers over zonder (valide) procedurestappen. Deze worden ook verwijderd.');
   return resultArray.sort((a, b) => {
     if (order === 'desc') {
       return b.procedurestappen.length - a.procedurestappen.length;
@@ -301,13 +339,13 @@ router.get('/mixdossiers-fix-get-foute-dossiers', async function(req, res) {
 /* Oplijsten alle procedurestappen pre-kaleidos */
 router.get('/mixdossiers-fix-get-alle-dossiers', async function(req, res) {
   try {
-    let cases = await getDossiers(+req.query.limit)
+    let cases = await getDossiers(+req.query.limit, req.query.order ? req.query.order : 'desc');
     const name = req.path.replace('/', '');
     console.log(`GET /${name}: ${cases.length} results`);
     if (req.query && req.query.csv) {
       csv.sendCSV(cases, req, res, `${name}.csv`, []);
     } else {
-      res.send(cases.slice(0, req.query.limit ? +req.query.limit : cases.length));
+      res.send(cases);
     }
   } catch (e) {
     console.log(e);
@@ -329,7 +367,7 @@ router.get('/mixdossiers-fix-get-alle-dossiers', async function(req, res) {
     }
 */
 const splitIntoSingleSubcases = async function (limit) {
-  let cases = await getDossiers(limit); // hier zitten de foute procedurestappen bij, die er sowieso uit moeten
+  let cases = await getDossiers(limit ? +limit : 0, 'desc'); // hier zitten de foute procedurestappen bij, die er sowieso uit moeten
   console.log(cases.length + ' dossiers opgehaald');
   // haal eerst deze foute procedurestappen er uit. Later gaan we hier nog eens over om de te verwijderen triples aan te maken.
   for (let i = 0; i < cases.length; i++) {
@@ -351,7 +389,10 @@ const splitIntoSingleSubcases = async function (limit) {
   let choseTitle = 0;
   let choseExisting = 0;
   for (let i = 0; i < cases.length; i++) {
-    if (cases[i].procedurestappen.length === 1) {
+    if (cases[i].procedurestappen.length === 0) {
+      // deze dossiers bestonden uitsluitend uit procedurestappen die in de speciale gevallen voorkomen. Deze moeten dus sowieso verwijderd worden.
+      casesToRemove.push(cases[i]);
+    } else if (cases[i].procedurestappen.length === 1) {
       // check if we already added this subcase
       if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap]) {
         // NOTE: This happened because we already created a new case for this in the next step (split out of a bigger case)
@@ -367,7 +408,6 @@ const splitIntoSingleSubcases = async function (limit) {
           // indien er een publicatie is bij 1 dossier, hou die sowieso
           if (splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length === 0 && cases[i].publicatieDossiers.length > 0) {
             // verwijder het bestaande dossier.
-            casesToRemove.push(cases[i]);
             casesToRemove.push(splitCasesMapping[cases[i].procedurestappen[0].procedurestap]);
             splitCasesMapping[cases[i].procedurestappen[0].procedurestap] = cases[i];
             chosePublication++;
@@ -401,19 +441,19 @@ const splitIntoSingleSubcases = async function (limit) {
             noPubCount++;
           }
 
-          console.log('---------');
-          console.log('WARNING: double single subcase ' + cases[i].procedurestappen[0].procedurestap + ' : ' + subcaseTitle);
-          console.log('Appears in: ');
-          console.log(cases[i].url +
-            ' (' + cases[i].procedurestappen.length + ' procedurestappen)' +
-            ' (' + cases[i].publicatieDossiers.length + ' publications)' +
-            ' case: ' + cases[i].dossier + ' : ' + currentTitle
-          );
-          console.log(splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url +
-            ' (' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].procedurestappen.length + ' procedurestappen)' +
-            ' (' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length + ' publications)' +
-            ' case: ' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier + ' : ' + existingTitle
-          );
+          // console.log('---------');
+          // console.log('WARNING: double single subcase ' + cases[i].procedurestappen[0].procedurestap + ' : ' + subcaseTitle);
+          // console.log('Appears in: ');
+          // console.log(cases[i].url +
+          //   ' (' + cases[i].procedurestappen.length + ' procedurestappen)' +
+          //   ' (' + cases[i].publicatieDossiers.length + ' publications)' +
+          //   ' case: ' + cases[i].dossier + ' : ' + currentTitle
+          // );
+          // console.log(splitCasesMapping[cases[i].procedurestappen[0].procedurestap].url +
+          //   ' (' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].procedurestappen.length + ' procedurestappen)' +
+          //   ' (' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].publicatieDossiers.length + ' publications)' +
+          //   ' case: ' + splitCasesMapping[cases[i].procedurestappen[0].procedurestap].dossier + ' : ' + existingTitle
+          // );
         } else {
           // this stays a new case, no need to add it again
         }
@@ -455,6 +495,7 @@ const splitIntoSingleSubcases = async function (limit) {
   console.log(Object.keys(splitCasesMapping).length + ' dossiers in totaal gehouden na opsplitsen.');
   console.log(keptCaseCount + ' hiervan zijn behouden zoals voorheen.');
   console.log(newCaseCount + ' hiervan zijn nieuw en hebben nog geen URL.');
+  console.log(casesToRemove.length + ' dossiers zullen worden verwijderd na deze stap.');
   console.log('Maximum ' + maxCount + ' procedurestap(pen) per dossier.');
   return { splitCasesMapping, casesToRemove };
 }
@@ -462,10 +503,10 @@ const splitIntoSingleSubcases = async function (limit) {
 /* Route om de splitIntoSingleSubcases functie te testen. */
 router.get('/mixdossiers-fix-1-dossier-per-procedurestap', async function(req, res) {
   try {
-    let cases = await splitIntoSingleSubcases().splitCasesMapping;
+    let result = await splitIntoSingleSubcases();
     const name = req.path.replace('/', '');
-    console.log(`GET /${name}: ${Object.keys(cases).length} results`); // dit aantal moet overeenstemmen met queries/aantal_pre_kaleidos_procedurestappen_zonder_speciale_gevallen.sparql
-    res.send(cases);
+    console.log(`GET /${name}: ${Object.keys(result.splitCasesMapping).length} results`);
+    res.send(result);
   } catch (e) {
     console.log(e);
     res.status(500).send(e);
@@ -659,8 +700,12 @@ const clusterSubcases = async function (limit) {
 /* Route om de clusterSubcases functie te testen. */
 router.get('/mixdossiers-fix-cluster-procedurestappen', async function(req, res) {
   try {
-    let clusterSubcasesResult = await clusterSubcases(req.query.limit);
-    const name = req.path.replace('/', '');
+    const name = 'clustered-cases-cache';
+    let clusterSubcasesResult = await caching.getLocalJSONFile(name); // cache dit om niet telkens de clustering stap te laten lopen en makkelijker de migraties aan te maken
+    if (!clusterSubcasesResult || req.query.refreshcache === true) {
+      clusterSubcasesResult = await clusterSubcases(req.query.limit);
+      await caching.writeLocalFile(name, clusterSubcasesResult);
+    }
     console.log(`GET /${name}: ${Object.keys(clusterSubcasesResult.clusteredCases).length} results`);
     res.send(cases);
   } catch (e) {
@@ -869,8 +914,12 @@ let caseMigrationQuerySuffix = `    }
 */
 router.get('/mixdossiers-fix-create-migrations', async function(req, res) {
   try {
-    let clusterSubcasesResult = await clusterSubcases(req.query.limit);
-    const name = req.path.replace('/', '');
+    const name = 'clustered-cases-cache';
+    let clusterSubcasesResult = await caching.getLocalJSONFile(name); // cache dit om niet telkens de clustering stap te laten lopen en makkelijker de migraties aan te maken
+    if (!clusterSubcasesResult || req.query.refreshcache === true) {
+      clusterSubcasesResult = await clusterSubcases(req.query.limit);
+      await caching.writeLocalFile(name, clusterSubcasesResult);
+    }
     let removalFilenames = await createDeletions(clusterSubcasesResult.casesToRemove);
     let subcaseFilenames = await createSubcaseLinks(clusterSubcasesResult.clusteredCases.filter((clusteredCase) => { return clusteredCase.besluitvormingsaangelegenheid; }));
     let newcaseFilenames = await createNewCases(clusterSubcasesResult.clusteredCases.filter((clusteredCase) => { return !clusteredCase.besluitvormingsaangelegenheid; }));
