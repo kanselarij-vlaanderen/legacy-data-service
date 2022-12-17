@@ -901,30 +901,36 @@ const createNewCases = async function (clusteredCases) {
   let caseMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
 PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
 PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
 INSERT {
   GRAPH ?g {
     ?dossier a dossier:Dossier .
     ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
+    ?dossier mu:uuid ?dossierUUID .
     ?besluitvormingsaangelegenheid a besluitvorming:Besluitvormingsaangelegenheid .
+    ?besluitvormingsaangelegenheid mu:uuid ?besluitvormingsaangelegenheidUUID .
     ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
   }
 }
 WHERE {
   GRAPH ?g {
-    VALUES (?dossier ?besluitvormingsaangelegenheid ?procedurestap) {
+    VALUES (?dossier ?dossierUUID ?besluitvormingsaangelegenheid ?besluitvormingsaangelegenheidUUID ?procedurestap) {
 `;
 let caseMigrationQuerySuffix = `    }
     ?procedurestap ?p ?o .
   }
 }`;
   let currentMigrationQuery = '' + caseMigrationQueryPrefix;
+  let uuidsToInsert = [];
   for (const clusteredCase of clusteredCases) {
     // leg hier enkel links voor nieuwe dossiers
     if (!clusteredCase.dossier && !clusteredCase.besluitvormingsaangelegenheid) {
-      let dossierUri = CASE_BASE_URI + uuid();
-      let besluitvormingsaangelegenheidUri = DECISIONFLOW_BASE_URI + uuid();
+      let dossierUUID = uuid();
+      let dossierUri = CASE_BASE_URI + dossierUUID;
+      let besluitvormingsaangelegenheidUUID = uuid();
+      let besluitvormingsaangelegenheidUri = DECISIONFLOW_BASE_URI + besluitvormingsaangelegenheidUUID;
       for (const subcase of clusteredCase.procedurestappen) {
-        currentMigrationQuery += `      ( <${dossierUri}> <${besluitvormingsaangelegenheidUri}> <${subcase.procedurestap}> )\n`;
+        currentMigrationQuery += `      ( <${dossierUri}> "${dossierUUID}" <${besluitvormingsaangelegenheidUri}> "${besluitvormingsaangelegenheidUUID}" <${subcase.procedurestap}> )\n`;
         currentBatchSize++;
         if (currentBatchSize === BATCH_SIZE) {
           currentMigrationQuery += caseMigrationQuerySuffix;
