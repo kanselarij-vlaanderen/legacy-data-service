@@ -1,0 +1,54 @@
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX step: <http://example.com/step/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+PREFIX adms: <http://www.w3.org/ns/adms#>
+PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX pav: <http://purl.org/pav/>
+
+SELECT DISTINCT ?docUrl ?decisionLabel ?subcaseTypeLabel ?created ?title ?publicatieDossierUrl ?statusLabel where {
+  VALUES (?decisionResult) { (<http://themis.vlaanderen.be/id/concept/beslissing-resultaatcodes/56312c4b-9d2a-4735-b0b1-2ff14bb524fd>) }
+  graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?agenda besluitvorming:isAgendaVoor <http://themis.vlaanderen.be/id/zitting/640F381B3335D329E25ECA38> .
+    FILTER NOT EXISTS { ?nieuwereAgenda prov:wasRevisionOf ?agenda }
+    ?agenda dct:hasPart ?agendaItem .
+    ?agendaItem besluitvorming:geagendeerdStuk ?doc .
+    ?agendaItemTreatment dct:subject ?agendaItem ;
+                         besluitvorming:heeftBeslissing ?decisionActivity .
+    ?decisionActivity ext:beslissingVindtPlaatsTijdens ?subcase ;
+                      besluitvorming:resultaat ?decisionResult .
+    ?container dossier:Collectie.bestaatUit ?doc ;
+              dct:type <https://data.vlaanderen.be/id/concept/AardWetgeving/BesluitVanDeVlaamseRegering> .
+    ?doc mu:uuid ?docId ;
+      dct:created ?created ;
+      dct:title ?title .
+    FILTER NOT EXISTS { ?nextDoc pav:previousVersion ?doc }
+    FILTER (?created > xsd:dateTime("2023-01-01T00:00:00+01:00"))
+    ?subcase a dossier:Procedurestap ;
+        dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/6f7d1086-7c02-4a80-8c60-5690894f70fc> ;
+        mu:uuid ?subcaseId .
+    OPTIONAL {
+      ?subcase dct:type ?subcaseType .
+      GRAPH <http://mu.semte.ch/graphs/public> {
+        ?subcaseType skos:prefLabel ?subcaseTypeLabel .
+      }
+    }
+    ?decFlow dossier:doorloopt ?subcase;
+             mu:uuid ?decFlowId .
+    ?dossier dossier:Dossier.isNeerslagVan ?decFlow .
+    OPTIONAL {
+      ?pubFlow dossier:behandelt ?dossier;
+            mu:uuid ?pubFlowId;
+            adms:status ?status .
+    }
+  }
+  ?decisionResult skos:prefLabel ?decisionLabel .
+  BIND(CONCAT("https://kaleidos.vlaanderen.be/document/",STR(?docId)) AS ?docUrl)
+  BIND(IF(BOUND(?pubFlowId), CONCAT("https://kaleidos.vlaanderen.be/publicaties/",STR(?pubFlowId),"/dossier"), "") AS ?publicatieDossierUrl)
+  OPTIONAL { ?status skos:prefLabel ?statusLabel }
+} ORDER BY DESC(?created)

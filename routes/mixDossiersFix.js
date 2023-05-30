@@ -765,10 +765,17 @@ router.get('/mixdossiers-fix-cluster-procedurestappen', async function(req, res)
     }
     console.log(`GET /${name}: ${Object.keys(clusterSubcasesResult.clusteredCases).length} geclusterde dossiers.`);
     console.log(`GET /${name}: ${clusterSubcasesResult.casesToRemove.length} dossiers zullen worden verwijderd`);
-    res.send({
-      clusteredCases: clusterSubcasesResult.clusteredCases.slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.clusteredCases.length), // limit is for easier inspection
-      casesToRemove: clusterSubcasesResult.casesToRemove.sort((a, b) => { return b.aantalProcedurestappen - a.aantalProcedurestappen;}).slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.casesToRemove.length)
-    });
+    if (req.query.aantalProcedurestappen) {
+      res.send({
+        clusteredCases: clusterSubcasesResult.clusteredCases.slice((clusteredCase) => { return clusteredCase.aantalProcedurestappen === +req.query.aantalProcedurestappen; }).slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.clusteredCases.length), // limit is for easier inspection
+        casesToRemove: clusterSubcasesResult.casesToRemove.slice((clusteredCase) => { return clusteredCase.aantalProcedurestappen === +req.query.aantalProcedurestappen; }).slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.casesToRemove.length)
+      });
+    } else {
+      res.send({
+        clusteredCases: clusterSubcasesResult.clusteredCases.slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.clusteredCases.length), // limit is for easier inspection
+        casesToRemove: clusterSubcasesResult.casesToRemove.sort((a, b) => { return b.aantalProcedurestappen - a.aantalProcedurestappen;}).slice(0, req.query.limit ? +req.query.limit : clusterSubcasesResult.casesToRemove.length)
+      });
+    }
   } catch (e) {
     console.log(e);
     res.status(500).send(e);

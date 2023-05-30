@@ -9,7 +9,7 @@ PREFIX adms: <http://www.w3.org/ns/adms#>
 SELECT DISTINCT ?publicatieDossierUrl ?statusLabel ?created ?title ?kaleidosUrl where {
   graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
     ?subcase a dossier:Procedurestap ;
-        dct:type <http://example.com/step/6f7d1086-7c02-4a80-8c60-5690894f70fc> ;
+        dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/6f7d1086-7c02-4a80-8c60-5690894f70fc> ;
         dct:title ?title ;
         mu:uuid ?subcaseId ;
         ext:bevatReedsBezorgdeDocumentversie ?doc ;
