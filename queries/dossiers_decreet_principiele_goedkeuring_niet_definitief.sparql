@@ -9,8 +9,6 @@ SELECT DISTINCT ?dossierUrl COALESCE(?shortTitle, ?title) AS ?dossierTitel ?aanm
   graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
     ?container dossier:Collectie.bestaatUit ?doc ;
               dct:type <https://data.vlaanderen.be/id/concept/AardWetgeving/Decreet> .
-    ?doc dct:created ?aanmaakDatum .
-    FILTER (?aanmaakDatum > xsd:dateTime("2019-10-01T00:00:00+01:00"))
     ?subcase a dossier:Procedurestap ;
         dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/7b90b3a6-2787-4b41-8a1d-886fc5abbb33> .
     ?submissionActivity prov:generated ?doc ;
@@ -20,6 +18,8 @@ SELECT DISTINCT ?dossierUrl COALESCE(?shortTitle, ?title) AS ?dossierTitel ?aanm
     ?dossier dossier:Dossier.isNeerslagVan ?decFlow .
     OPTIONAL { ?dossier dct:title ?title . }
     OPTIONAL { ?dossier dct:alternative ?shortTitle . }
+    ?dossier dct:created ?aanmaakDatum .
+    FILTER (?aanmaakDatum > xsd:dateTime("2019-10-01T00:00:00+01:00"))
     FILTER NOT EXISTS {
       ?decFlow dossier:doorloopt ?subcase2 .
       ?subcase2 dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/6f7d1086-7c02-4a80-8c60-5690894f70fc> .
