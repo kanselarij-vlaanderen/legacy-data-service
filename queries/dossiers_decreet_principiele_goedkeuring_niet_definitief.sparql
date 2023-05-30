@@ -1,0 +1,29 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+
+SELECT DISTINCT ?dossierUrl COALESCE(?shortTitle, ?title) AS ?dossierTitel ?aanmaakDatum WHERE {
+  graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?container dossier:Collectie.bestaatUit ?doc ;
+              dct:type <https://data.vlaanderen.be/id/concept/AardWetgeving/Decreet> .
+    ?doc dct:created ?aanmaakDatum .
+    FILTER (?aanmaakDatum > xsd:dateTime("2019-10-01T00:00:00+01:00"))
+    ?subcase a dossier:Procedurestap ;
+        dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/7b90b3a6-2787-4b41-8a1d-886fc5abbb33> .
+    ?submissionActivity prov:generated ?doc ;
+                        ext:indieningVindtPlaatsTijdens ?subcase .
+    ?decFlow dossier:doorloopt ?subcase;
+             mu:uuid ?decFlowId .
+    ?dossier dossier:Dossier.isNeerslagVan ?decFlow .
+    OPTIONAL { ?dossier dct:title ?title . }
+    OPTIONAL { ?dossier dct:alternative ?shortTitle . }
+    FILTER NOT EXISTS {
+      ?decFlow dossier:doorloopt ?subcase2 .
+      ?subcase2 dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/6f7d1086-7c02-4a80-8c60-5690894f70fc> .
+    }
+  }
+  BIND(CONCAT("https://kaleidos.vlaanderen.be/dossiers/",STR(?decFlowId),"/deeldossiers") AS ?dossierUrl)
+} ORDER BY DESC(?aanmaakDatum)
