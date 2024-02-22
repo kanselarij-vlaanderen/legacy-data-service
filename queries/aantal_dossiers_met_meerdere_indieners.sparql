@@ -6,23 +6,19 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
+PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#>
 
-SELECT COUNT(DISTINCT ?dossier) WHERE {
+SELECT ?aantalIndienendePersonen COUNT(DISTINCT ?besluitvormingsaangelegenheid) as ?aantalbesluitvormingsaangelegenheden  WHERE {
   {
-    SELECT COUNT(DISTINCT ?dossier) as ?count ?procedurestap WHERE {
+    SELECT COUNT(DISTINCT ?person) as ?aantalIndienendePersonen  ?besluitvormingsaangelegenheid WHERE {
       GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
         ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
         ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
-        ?activity besluitvorming:vindtPlaatsTijdens ?procedurestap .
-        ?activity besluitvorming:genereertAgendapunt ?agendapunt .
-        ?agenda dct:hasPart ?agendapunt .
-        ?agenda besluitvorming:isAgendaVoor ?meeting .
-        ?meeting besluit:geplandeStart ?plannedStart .
-        FILTER ( ?plannedStart < xsd:dateTime("2019-10-02T02:00:00Z"))
+        ?procedurestap ext:indiener ?indiener .
       }
-    } ORDER BY desc(?count)
+      GRAPH <http://mu.semte.ch/graphs/public> {
+         ?indiener mandaat:isBestuurlijkeAliasVan ?person .
+      }
+    }
   }
-  FILTER (?count > 1)
-  ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid .
-  ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
-}
+} ORDER BY desc(?aantalbesluitvormingsaangelegenheden  )

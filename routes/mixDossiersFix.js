@@ -792,7 +792,7 @@ const createDeletions = async function (casesToRemove) {
   // Eerst de DELETES voor alle dossiers die niet overgehouden zijn. Deze zitten normaal gezien in casesToRemove
   console.log(`Migraties worden aangemaakt voor ${Object.keys(casesToRemove).length} te verwijderen dossiers...`);
   let deleteMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
-PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
 DELETE {
   GRAPH ?g {
     ?dossier ?p1 ?o1 .
@@ -846,7 +846,7 @@ const createSubcaseLinks = async function (clusteredCases) {
   // De links mogen enkel gemaakt worden in de graphs waar de procedurestappen al aanwezig zijn en er nog geen link is van de besluitvormingsaangelegenheid
   console.log(`Migraties worden aangemaakt voor nieuwe procedurestap links voor ${Object.keys(clusteredCases).length} bestaande dossiers...`);
   let subcaseMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
-PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
 INSERT {
   GRAPH ?g {
     ?besluitvormingsaangelegenheid dossier:doorloopt ?procedurestap .
@@ -906,7 +906,7 @@ const createNewCases = async function (clusteredCases) {
   console.log(`Migraties worden aangemaakt voor ${Object.keys(clusteredCases).length} nieuwe dossiers...`);
   // NOTE: merk op dat we hier nog geen titel instellen. Dit doen we later voor alle legacy dossiers in 1 migratie zodat we een consistente db krijgen
   let caseMigrationQueryPrefix = `PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
-PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
 INSERT {

@@ -89,7 +89,7 @@ export default {
   },
 
   getStukkenVoorAgendapunt: async function (agendapuntUrl) {
-    const getQuery = `PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+    const getQuery = `PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
   PREFIX dct: <http://purl.org/dc/terms/>
 
   select DISTINCT  ?stuk ?title WHERE {

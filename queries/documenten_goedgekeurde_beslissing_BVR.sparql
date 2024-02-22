@@ -5,7 +5,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
 PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
 PREFIX adms: <http://www.w3.org/ns/adms#>
-PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
 PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
