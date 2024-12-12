@@ -1,0 +1,45 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?ministerraad ?link ?indiener ?dossierTitel {
+  {
+    SELECT DISTINCT (MAX(?meetingDate) AS ?laatsteMinisterraad) ?link ?indiener COALESCE(?shortTitle, ?title) AS ?dossierTitel WHERE {
+      graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
+        ?subcase a dossier:Procedurestap ;
+            mu:uuid ?subcaseId ;
+            dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/6f7d1086-7c02-4a80-8c60-5690894f70fc> ;
+            ext:procedurestapNaam ?procedurestapNaam .
+        OPTIONAL {
+          ?subcase ^besluitvorming:vindtPlaatsTijdens / besluitvorming:genereertAgendapunt ?agendaItem .
+          ?agendaItem ^dct:hasPart / besluitvorming:isAgendaVoor ?meeting .
+          ?meeting besluit:geplandeStart ?meetingDate .
+        }
+        OPTIONAL { ?subcase ext:indiener ?submitter . }
+        FILTER ( regex(?procedurestapNaam , "advies|adviezen", "i") )
+        ?decFlow dossier:doorloopt ?subcase;
+                 mu:uuid ?decFlowId .
+        ?dossier dossier:Dossier.isNeerslagVan ?decFlow .
+        OPTIONAL { ?dossier dct:title ?title . }
+        OPTIONAL { ?dossier dct:alternative ?shortTitle . }
+        ?dossier dct:created ?aanmaakDatum .
+        FILTER NOT EXISTS {
+          ?decFlow dossier:doorloopt ?subcase2 .
+          ?subcase2 dct:type <http://themis.vlaanderen.be/id/concept/procedurestap-type/7b90b3a6-2787-4b41-8a1d-886fc5abbb33> .
+        }
+      }
+      GRAPH <http://mu.semte.ch/graphs/public> {
+        ?submitter mandaat:isBestuurlijkeAliasVan / foaf:familyName ?indiener .
+      }
+      BIND(CONCAT("https://kaleidos.vlaanderen.be/dossiers/",STR(?decFlowId),"/deeldossiers") AS ?link)
+    } GROUP BY ?link ?indiener ?title ?shortTitle
+  }
+  BIND(IF(BOUND(?laatsteMinisterraad), CONCAT(DAY(?laatsteMinisterraad), "-", MONTH(?laatsteMinisterraad), "-", YEAR(?laatsteMinisterraad)), '') AS ?ministerraad)
+} ORDER BY DESC(?laatsteMinisterraad)
