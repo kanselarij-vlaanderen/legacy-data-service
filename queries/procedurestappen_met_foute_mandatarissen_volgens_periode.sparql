@@ -1,0 +1,84 @@
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
+PREFIX adms: <http://www.w3.org/ns/adms#>
+PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#> 
+PREFIX schema: <http://schema.org/>
+PREFIX org: <http://www.w3.org/ns/org#>
+
+
+SELECT DISTINCT  ?datumVergadering ?procedurestapLink ?agendapuntType ?puntNummer ?korteTitel ?huidigMandaat ?beginMandaat ?eindeMandaat ?nieuwMandaat ?beginNieuwMandaat ?eindeNieuwMandaat WHERE {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    # agendaitem info / connected to a meeting + has one or more mandatees assigned
+    # get subcase that has incorrect mandatees
+    ?agendaitem ^dct:hasPart/besluitvorming:isAgendaVoor ?meeting .
+    ?subcase ^besluitvorming:vindtPlaatsTijdens / besluitvorming:genereertAgendapunt ?agendaitem . 
+
+    #! choose one of these
+    ?subcase ext:indiener ?huidigMandaat.  # submitter
+    # ?subcase ext:heeftBevoegde ?huidigMandaat. # mandatee
+
+    ?subcase mu:uuid ?uuid .
+    ?agendaitem schema:position ?puntNummer .
+    ?agendaitem besluitvorming:korteTitel ?korteTitel .
+    ?agendaitem dct:type ?type .
+    
+    # concept label in public graph
+    GRAPH <http://mu.semte.ch/graphs/public> {?type skos:prefLabel ?agendapuntType . }
+    
+    # link for easy clicks (kaleidos-test when checking on ACC)
+    BIND(IRI(CONCAT('https://kaleidos-test.vlaanderen.be/procedurestap/', ?uuid)) AS ?procedurestapLink)
+
+    # "Eervol ontslag" means agendaitems (usually announcements) that use an "old" mandatee on purpose and should remain
+    MINUS {
+      ?agendaitem besluitvorming:korteTitel ?korteTitel .
+      FILTER (regex(?korteTitel ,"Eervol ontslag"))
+    }
+
+
+    # Grab the start and end times of the mandatees / mandatee could be active and have no end date
+    OPTIONAL { GRAPH <http://mu.semte.ch/graphs/public> {?huidigMandaat mandaat:einde ?eindeMandaat }}
+    GRAPH <http://mu.semte.ch/graphs/public> {?huidigMandaat mandaat:start ?beginMandaat }
+
+    # get all meetings ever (without filter on date the query is much slower)
+    {
+      SELECT DISTINCT ?meeting ?datumVergadering WHERE {
+        graph <http://mu.semte.ch/graphs/organizations/kanselarij> {
+          ?meeting a besluit:Vergaderactiviteit ;
+                                   besluit:geplandeStart ?datumVergadering .
+          FILTER ( ?datumVergadering > xsd:dateTime("1900-01-08T01:00:00Z"))
+        }}
+    }
+
+    # filter where the mandatee is outside of the date range of the chosen mandatee
+    # the first condition can only be true if an existing agendaitem was manually edited to have new mandatees
+    # the second condition is the one that will yield the most results
+    FILTER (?datumVergadering < ?beginMandaat || ?datumVergadering > ?eindeMandaat)
+
+    # check if there is a newer mandatee available for that same person with the same role
+    OPTIONAL { GRAPH <http://mu.semte.ch/graphs/public> {
+        ?huidigMandaat mandaat:isBestuurlijkeAliasVan ?persoon ;
+                  org:holds ?role .
+        OPTIONAL
+        {
+          ?nieuwMandaat mandaat:isBestuurlijkeAliasVan ?persoon ;
+                        org:holds ?role .
+          ?nieuwMandaat mandaat:start ?beginNieuwMandaat . 
+          OPTIONAL { ?nieuwMandaat mandaat:einde ?eindeNieuwMandaat . }
+        }
+      }
+    }
+    # find the correct mandatee for the date range of the meeting of the agendaitem
+    # equals not needed since mandatees transfer at midnight and meetings are normally during business hours
+    FILTER (?datumVergadering > ?beginNieuwMandaat)
+    FILTER(?datumVergadering < ?eindeNieuwMandaat)
+
+  }
+} ORDER BY  DESC(?datumVergadering)  ?puntNummer
