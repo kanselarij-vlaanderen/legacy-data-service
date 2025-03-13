@@ -6,11 +6,13 @@ import informationalQueries from './routes/informationalQueries';
 import agendaQueries from './routes/agendaQueries';
 import dossierQueries from './routes/dossierQueries';
 import mixDossiersFix from './routes/mixDossiersFix';
+import dossierTitelsFix from './routes/dossierTitelsFix';
 
 app.use(legacyQueries);
 app.use(dorisQueries);
 app.use(agendaQueries);
 app.use(informationalQueries);
 app.use(mixDossiersFix);
+app.use(dossierTitelsFix);
 
 app.use(errorHandler);
