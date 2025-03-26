@@ -9,7 +9,7 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
 
 
-SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestapTitel ?procedurestapNaam ?procedurestapType WHERE {
+SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestapLangeTitel ?procedurestapKorteTitel ?procedurestapNaam ?procedurestapType WHERE {
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
     ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid ;
              mu:uuid ?dossierId .
@@ -19,8 +19,9 @@ SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestap
                                    mu:uuid ?besluitvormingsaangelegenheidId ;
                                    dct:title ?besluitvormingsaangelegenheidTitel  .
     ?procedurestap mu:uuid ?procedurestapId ;
-                   dct:title ?procedurestapTitel ;
                    ^besluitvorming:vindtPlaatsTijdens ?agendaActivity .
+    OPTIONAL { ?procedurestap dct:title ?procedurestapLangeTitel . }
+    OPTIONAL { ?procedurestap dct:alternative ?procedurestapKorteTitel . }
     OPTIONAL { ?procedurestap ext:procedurestapNaam ?procedurestapNaam . }
     OPTIONAL { ?procedurestap dct:type ?procedurestapType . }
     ?agendaActivity besluitvorming:genereertAgendapunt ?agendapunt .
@@ -28,7 +29,7 @@ SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestap
             besluitvorming:isAgendaVoor ?meeting .
     ?meeting besluit:geplandeStart ?datumMR .
     FILTER ( ?datumMR < xsd:dateTime("2019-10-02T02:00:00Z"))
-    FILTER ( REGEX(STR(?langeTitel), "Principiële goedkeuring", "gi") )
+    FILTER ( REGEX(STR(?langeTitel), "(Principiële goedkeuring)|(Goedkeuring na advies)|(Goedkeuring na onderhandelingen)", "gi"))
     BIND(CONCAT("https://kaleidos-test.vlaanderen.be/dossiers/",STR(?besluitvormingsaangelegenheidId),"/deeldossiers/",STR(?procedurestapId)) AS ?url)
   }
 } ORDER BY ?datumMR ?besluitvormingsaangelegenheid

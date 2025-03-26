@@ -29,7 +29,7 @@ SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestap
             besluitvorming:isAgendaVoor ?meeting .
     ?meeting besluit:geplandeStart ?datumMR .
     FILTER ( ?datumMR < xsd:dateTime("2019-10-02T02:00:00Z"))
-    FILTER ( REGEX(STR(?langeTitel), "- Voorontwerp", "gi") )
+    FILTER ( REGEX(STR(?langeTitel), "- Ontwerp\S*", "gi") )
     BIND(CONCAT("https://kaleidos-test.vlaanderen.be/dossiers/",STR(?besluitvormingsaangelegenheidId),"/deeldossiers/",STR(?procedurestapId)) AS ?url)
   }
 } ORDER BY ?datumMR ?besluitvormingsaangelegenheid
