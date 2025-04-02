@@ -9,7 +9,7 @@ PREFIX tl: <http://mu.semte.ch/vocabularies/typed-literals/>
 PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
 
 
-SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestapLangeTitel ?procedurestapKorteTitel ?procedurestapNaam ?procedurestapType WHERE {
+SELECT ?procedurestapLink ?dossierLink ?datumMR ?procedurestapDatum ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestap ?procedurestapLangeTitel ?procedurestapKorteTitel ?procedurestapNaam ?procedurestapType WHERE {
   GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
     ?dossier dossier:Dossier.isNeerslagVan ?besluitvormingsaangelegenheid ;
              mu:uuid ?dossierId .
@@ -19,6 +19,7 @@ SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestap
                                    mu:uuid ?besluitvormingsaangelegenheidId ;
                                    dct:title ?besluitvormingsaangelegenheidTitel  .
     ?procedurestap mu:uuid ?procedurestapId ;
+                   dct:created ?procedurestapDatum ;
                    ^besluitvorming:vindtPlaatsTijdens ?agendaActivity .
     OPTIONAL { ?procedurestap dct:title ?procedurestapLangeTitel . }
     OPTIONAL { ?procedurestap dct:alternative ?procedurestapKorteTitel . }
@@ -30,6 +31,7 @@ SELECT ?url ?datumMR ?agendapunt ?dossier ?korteTitel ?langeTitel ?procedurestap
     ?meeting besluit:geplandeStart ?datumMR .
     FILTER ( ?datumMR < xsd:dateTime("2019-10-02T02:00:00Z"))
     FILTER ( REGEX(STR(?langeTitel), "- Ontwerp\S*", "gi") )
-    BIND(CONCAT("https://kaleidos-test.vlaanderen.be/dossiers/",STR(?besluitvormingsaangelegenheidId),"/deeldossiers/",STR(?procedurestapId)) AS ?url)
+    BIND(CONCAT("https://kaleidos-test.vlaanderen.be/dossiers/",STR(?besluitvormingsaangelegenheidId),"/deeldossiers/",STR(?procedurestapId)) AS ?procedurestapLink)
+    BIND(CONCAT("https://kaleidos-test.vlaanderen.be/dossiers/",STR(?besluitvormingsaangelegenheidId),"/deeldossiers/") AS ?dossierLink)
   }
-} ORDER BY ?datumMR ?besluitvormingsaangelegenheid
+} ORDER BY ?datumMR ?besluitvormingsaangelegenheid ?procedurestapDatum
