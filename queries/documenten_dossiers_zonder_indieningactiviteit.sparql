@@ -1,0 +1,31 @@
+PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+PREFIX dossier: <https://data.vlaanderen.be/ns/dossier#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX besluitvorming: <https://data.vlaanderen.be/ns/besluitvorming#>
+
+#query to check where documents are connected to case and agendaitem but are missing a submissionActivity linked to subcase
+
+SELECT *
+WHERE {
+  GRAPH <http://mu.semte.ch/graphs/organizations/kanselarij> {
+    ?case a dossier:Dossier ;
+  dossier:Dossier.bestaatUit ?currentDocuments .
+    ?currentDocuments dct:title ?title .
+
+    ?case dossier:Dossier.isNeerslagVan ?decisionmakingFlow .
+
+    # relation to submissionActivity
+    FILTER NOT EXISTS {
+      ?decisionmakingFlow dossier:doorloopt / ^ext:indieningVindtPlaatsTijdens /  prov:generated   ?currentDocuments .
+    }
+    #relation to agendaitem
+    FILTER EXISTS {
+      ?decisionmakingFlow dossier:doorloopt /
+      ^besluitvorming:vindtPlaatsTijdens / 
+      besluitvorming:genereertAgendapunt /
+      besluitvorming:geagendeerdStuk  ?currentDocuments .
+    } 
+  }
+}
