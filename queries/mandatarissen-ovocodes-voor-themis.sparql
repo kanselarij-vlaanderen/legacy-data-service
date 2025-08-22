@@ -1,8 +1,6 @@
 PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#>
 PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 PREFIX persoon: <https://data.vlaanderen.be/ns/persoon#>
-PREFIX g: <https://data.vlaanderen.be/ns/generiek#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX org: <http://www.w3.org/ns/org#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -12,10 +10,8 @@ PREFIX mandaat: <http://data.vlaanderen.be/ns/mandaat#>
 PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
 PREFIX sign: <http://mu.semte.ch/vocabularies/ext/handtekenen/>
 
-SELECT DISTINCT ?mandataris ?regering ?regeringsLabel ?regeringVan ?regeringTot ?titel ?nieuwsbriefTitel ?mandaatTitel ?mandaatStart ?mandaatEinde ?rangorde ?familyName ?gebruikteVoornaam ?ovoCode
-FROM <http://mu.semte.ch/graphs/public>
-FROM <http://mu.semte.ch/graphs/system/users>
-WHERE {
+SELECT DISTINCT ?ovoCode ?organisatieNaam ?mandataris ?familyName ?gebruikteVoornaam WHERE {
+  GRAPH <http://mu.semte.ch/graphs/public> {
     ?mandataris a mandaat:Mandataris .
     ?regering prov:hadMember ?mandataris .
     ?regering skos:prefLabel ?regeringsLabel .
@@ -25,19 +21,20 @@ WHERE {
       ?regering prov:qualifiedInvalidation ?opheffing .
       ?opheffing prov:atTime ?regeringTot
     } .
-    ?mandataris mandaat:isBestuurlijkeAliasVan ?person  .
-    ?person persoon:gebruikteVoornaam ?gebruikteVoornaam .
-    ?person foaf:familyName ?familyName .
-    ?mandataris mandaat:start ?mandaatStart .
+    OPTIONAL { ?mandataris mandaat:isBestuurlijkeAliasVan ?person } .
+    OPTIONAL { ?person persoon:gebruikteVoornaam ?gebruikteVoornaam } .
+    OPTIONAL { ?person foaf:familyName ?familyName } .
+    OPTIONAL { ?mandataris mandaat:start ?mandaatStart } .
     OPTIONAL { ?mandataris mandaat:einde ?mandaatEinde } .
-    ?mandataris mandaat:rangorde ?rangorde .
+    FILTER NOT EXISTS { ?mandataris mandaat:einde ?mandaatEinde } .
+    OPTIONAL { ?mandataris mandaat:rangorde ?rangorde } .
     OPTIONAL { ?mandataris dcterms:title ?titel } .
-    OPTIONAL { ?mandataris ext:nieuwsbriefTitel ?nieuwsbriefTitel } .
     OPTIONAL { ?mandataris org:holds / org:role / skos:prefLabel ?mandaatTitel } .
-     OPTIONAL {
-          ?user sign:isOndertekenaarVoor ?person .
-          ?membership org:organization ?organisatie ;
-                                 org:member ?user .
-          ?organisatie org:identifier ?ovoCode .
-       }
+  }
+  GRAPH <http://mu.semte.ch/graphs/system/users> {
+    ?org a foaf:Organization ;
+         sign:isOrganisatieVoorMandataris ?mandataris ;
+         skos:prefLabel ?organisatieNaam ;
+         org:identifier ?ovoCode .
+  }
 } ORDER BY ?regeringVan ?mandaatStart ?rangorde
